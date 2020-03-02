@@ -22,7 +22,7 @@ using DbMap;
 
 class Program
 {
-    private static readonly CustomerNameQuery = new DbQuery("SELECT Name FROM Customer WHERE CustomerId = @customerId");
+    private static readonly CustomerQuery = new DbQuery("SELECT Name FROM Customer WHERE CustomerId = @customerId");
 
     public void Main()
     {
@@ -31,7 +31,7 @@ class Program
     
         using var connection = new SqlConnection(connectionString);
         
-        var customer = CustomerNameQuery.ExecuteSingleOrDefault<Customer>(connection, new { customerId = 10 });
+        var customer = CustomerQuery.ExecuteSingleOrDefault<Customer>(connection, new { customerId = 10 });
         
         // TODO: Do something with customer.
         .
