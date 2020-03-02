@@ -109,8 +109,8 @@ namespace DbMap.Deserialization
             }
 
             // DeserializeAll method
-            var deserializeAllMethod = typeBuilder.DefineMethod(nameof(DeserializeAll), MethodAttributes.Public | MethodAttributes.Virtual);
             {
+                var deserializeAllMethod = typeBuilder.DefineMethod(nameof(DeserializeAll), MethodAttributes.Public | MethodAttributes.Virtual);
                 var returnTypeParameter = deserializeAllMethod.DefineGenericParameters("TReturn")[0];
 
                 deserializeAllMethod.SetReturnType(typeof(IEnumerable<>).MakeGenericType(returnTypeParameter));
@@ -198,10 +198,7 @@ namespace DbMap.Deserialization
                 ThrowException.NoDefaultConstructor();
             }
 
-            var userTypeLocalIndex = locals.DeclareLocal(type, "userType");
-
             il.Emit(OpCodes.Newobj, constructor);
-            il.Emit(OpCodes.Stloc, userTypeLocalIndex);
 
             for (var ordinal = 0; ordinal < columnNames.Length; ordinal++)
             {
@@ -219,19 +216,17 @@ namespace DbMap.Deserialization
                         continue;
                     }
 
-                    il.Emit(OpCodes.Ldloc, userTypeLocalIndex);
+                    il.Emit(OpCodes.Dup);
                     EmitGetValue(il, locals, backingField.FieldType, ordinal);
                     il.Emit(OpCodes.Stfld, backingField);
                 }
                 else
                 {
-                    il.Emit(OpCodes.Ldloc, userTypeLocalIndex);
+                    il.Emit(OpCodes.Dup);
                     EmitGetValue(il, locals, propertyInfo.PropertyType, ordinal);
                     il.Emit(OpCodes.Callvirt, propertyInfo.GetSetMethod());
                 }
             }
-
-            il.Emit(OpCodes.Ldloc, userTypeLocalIndex);
         }
 
         private static void EmitGetValue(ILGenerator il, LocalsMap locals, Type type, int ordinal)
