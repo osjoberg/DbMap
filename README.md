@@ -22,16 +22,16 @@ using DbMap;
 
 class Program
 {
-    private static readonly CustomerQuery = new DbQuery("SELECT Name FROM Customer WHERE CustomerId = @customerId");
+    private static readonly DbQuery CustomerQuery = new DbQuery("SELECT Name FROM Customer WHERE CustomerId = @customerId");
 
-    public void Main()
+    static void Main()
     {
         // TODO: Set connection string.
-        var connectionString = "..."
+        var connectionString = "...";
     
         using var connection = new SqlConnection(connectionString);
         
-        var customer = CustomerQuery.ExecuteSingleOrDefault<Customer>(connection, new { customerId = 10 });
+        var customer = CustomerQuery.ExecuteQuerySingleOrDefault<Customer>(connection, new { customerId = 10 });
         
         // TODO: Do something with customer.
         .
