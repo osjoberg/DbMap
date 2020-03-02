@@ -31,7 +31,7 @@ class Program
     
         using var connection = new SqlConnection(connectionString);
         
-        var customer = CustomerQuery.ExecuteQuerySingleOrDefault<Customer>(connection, new { customerId = 10 });
+        var customer = CustomerQuery.QuerySingleOrDefault<Customer>(connection, new { customerId = 10 });
         
         // TODO: Do something with customer.
         .
@@ -47,30 +47,30 @@ class Program
 
 Small benchmark, query 1 row of 6 columns using 1 parameter
 ```cmd
-|       Method |     Mean |   Error |  StdDev |
-|------------- |---------:|--------:|--------:|
-|  EFCoreSmall | 161.9 us | 4.09 us | 8.97 us | => ~ 44% slower than DbMap
-|  DapperSmall | 138.8 us | 4.25 us | 9.25 us | => ~ 23% slower than DbMap
-|  RepoDbSmall | 121.2 us | 1.31 us | 2.76 us | => ~ 12% slower than DbMap
-|   DbMapSmall | 106.2 us | 3.58 us | 7.63 us |
+|      Method |     Mean |   Error |  StdDev |
+|------------ |---------:|--------:|--------:|
+| EFCoreSmall | 163.3 us | 2.72 us | 5.92 us | => ~ 46% slower than DbMap
+| DapperSmall | 141.2 us | 3.19 us | 6.92 us | => ~ 26% slower than DbMap
+| RepoDbSmall | 122.6 us | 1.45 us | 3.05 us | => ~ 15% slower than DbMap
+|  DbMapSmall | 103.4 us | 1.31 us | 2.79 us |
 ```
 
 Medium benchmark, query 100 rows of 10 columns using 5 parameters
 ```cmd
-|        Method |     Mean |    Error |   StdDev |
-|-------------- |---------:|---------:|---------:|
-|  EFCoreMedium | 399.6 us | 13.91 us | 29.34 us | => ~ 21% slower than DbMap
-|  DapperMedium | 369.8 us | 11.53 us | 24.82 us | => ~ 14% slower than DbMap
-|  RepoDbMedium | 334.0 us | 11.10 us | 24.60 us | => ~  5% slower than DbMap
-|   DbMapMedium | 315.2 us | 13.35 us | 29.85 us |
+|       Method |     Mean |    Error |   StdDev |
+|------------- |---------:|---------:|---------:|
+| EFCoreMedium | 382.8 us |  7.52 us | 16.04 us | => ~ 17% slower than DbMap
+| DapperMedium | 387.6 us | 17.32 us | 38.02 us | => ~ 18% slower than DbMap
+| RepoDbMedium | 334.9 us | 10.50 us | 23.05 us | => ~  5% slower than DbMap
+|  DbMapMedium | 315.0 us | 14.70 us | 31.95 us |
 ```
 
 Large benchmark, query 10.000 rows of 22 columns using 10 parameters
 ```cmd
-|       Method |     Mean |    Error |   StdDev |
-|------------- |---------:|---------:|---------:|
-|  EFCoreLarge | 47.60 ms | 0.450 ms | 0.949 ms | => ~ 16% slower than DbMap
-|  DapperLarge | 48.02 ms | 0.353 ms | 0.736 ms | => ~ 17% slower than DbMap
-|  RepoDbLarge | 42.38 ms | 0.349 ms | 0.745 ms | => ~  6% slower than DbMap
-|   DbMapLarge | 39.66 ms | 0.345 ms | 0.728 ms |
+|      Method |     Mean |    Error |   StdDev |
+|------------ |---------:|---------:|---------:|
+| EFCoreLarge | 46.16 ms | 0.661 ms | 1.394 ms | => ~ 16% slower than DbMap
+| DapperLarge | 46.33 ms | 0.398 ms | 0.840 ms | => ~ 16% slower than DbMap
+| RepoDbLarge | 40.40 ms | 0.381 ms | 0.805 ms | => ~  5% slower than DbMap
+|  DbMapLarge | 38.04 ms | 0.382 ms | 0.813 ms |
 ```
