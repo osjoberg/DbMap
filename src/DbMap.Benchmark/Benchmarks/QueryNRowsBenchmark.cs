@@ -103,7 +103,7 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public List<Large> DbQueryLarge()
+        public List<Large> DbMapLarge()
         {
             return largeQuery.ExecuteQuery<Large>(sqlConnection).ToList();
         }

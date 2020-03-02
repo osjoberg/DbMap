@@ -61,7 +61,7 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public List<Medium> DbQueryMedium()
+        public List<Medium> DbMapMedium()
         {
             return MediumQuery.ExecuteQuery<Medium>(sqlConnection, MediumParameters).ToList();
         }

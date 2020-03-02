@@ -79,7 +79,7 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public Large DbQueryLarge()
+        public Large DbMapLarge()
         {
             return LargeQuery.ExecuteQuerySingle<Large>(sqlConnection);
         }
