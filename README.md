@@ -51,7 +51,7 @@ Small benchmark, query 1 row of 6 columns using 1 parameter
 |------------- |---------:|--------:|--------:|
 |  EFCoreSmall | 161.9 us | 4.09 us | 8.97 us | => ~ 44% slower than DbMap
 |  DapperSmall | 138.8 us | 4.25 us | 9.25 us | => ~ 23% slower than DbMap
-|  RepoDbSmall | 121.2 us | 1.31 us | 2.76 us | => ~  8% slower than DbMap
+|  RepoDbSmall | 121.2 us | 1.31 us | 2.76 us | => ~ 12% slower than DbMap
 |   DbMapSmall | 106.2 us | 3.58 us | 7.63 us |
 ```
 
