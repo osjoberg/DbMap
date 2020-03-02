@@ -45,7 +45,7 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<Small> EFCoreSmall()
         {
-            return dbMapDbContext.Small.ToList();
+            return dbMapDbContext.Small.AsList();
         }
 
         [Benchmark]
@@ -57,13 +57,13 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<Small> RepoDbSmall()
         {
-            return sqlConnection.ExecuteQuery<Small>(SmallSql, SmallParameters).ToList();
+            return sqlConnection.ExecuteQuery<Small>(SmallSql, SmallParameters).AsList();
         }
 
         [Benchmark]
         public List<Small> DbMapSmall()
         {
-            return SmallQuery.ExecuteQuery<Small>(sqlConnection, SmallParameters).ToList();
+            return SmallQuery.ExecuteQuery<Small>(sqlConnection, SmallParameters).AsList();
         }
     }
 }

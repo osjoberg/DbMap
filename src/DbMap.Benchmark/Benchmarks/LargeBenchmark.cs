@@ -45,7 +45,7 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<Large> EFCoreLarge()
         {
-            return dbMapDbContext.Large.ToList();
+            return dbMapDbContext.Large.AsList();
         }
 
         [Benchmark]
@@ -57,13 +57,13 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<Large> RepoDbLarge()
         {
-            return sqlConnection.ExecuteQuery<Large>(LargeSql, LargeParameters).ToList();
+            return sqlConnection.ExecuteQuery<Large>(LargeSql, LargeParameters).AsList();
         }
 
         [Benchmark]
         public List<Large> DbMapLarge()
         {
-            return LargeQuery.ExecuteQuery<Large>(sqlConnection, LargeParameters).ToList();
+            return LargeQuery.ExecuteQuery<Large>(sqlConnection, LargeParameters).AsList();
         }
     }
 }

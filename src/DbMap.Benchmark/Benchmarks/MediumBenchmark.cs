@@ -45,7 +45,7 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<Medium> EFCoreMedium()
         {
-            return dbMapDbContext.Medium.ToList();
+            return dbMapDbContext.Medium.AsList();
         }
 
         [Benchmark]
@@ -57,13 +57,13 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<Medium> RepoDbMedium()
         {
-            return sqlConnection.ExecuteQuery<Medium>(MediumSql, MediumParameters).ToList();
+            return sqlConnection.ExecuteQuery<Medium>(MediumSql, MediumParameters).AsList();
         }
 
         [Benchmark]
         public List<Medium> DbMapMedium()
         {
-            return MediumQuery.ExecuteQuery<Medium>(sqlConnection, MediumParameters).ToList();
+            return MediumQuery.ExecuteQuery<Medium>(sqlConnection, MediumParameters).AsList();
         }
     }
 }
