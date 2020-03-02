@@ -33,7 +33,7 @@ namespace DbMap.Test
             }
 
             Assert.AreEqual(expected, new DbQuery(query).ExecuteScalar<TReturn>(sqlConnection));
-            Assert.AreEqual(expected, new DbQuery(query + " AS Value").QuerySingle<Complex<TReturn>>(sqlConnection).Value);
+            Assert.AreEqual(expected, new DbQuery(query + " AS Value").QuerySingle<UserType<TReturn>>(sqlConnection).Value);
         }
 
         public static void AreEqual<TReturn>(TReturn? expected, string sql) where TReturn: struct
@@ -43,7 +43,7 @@ namespace DbMap.Test
             Assert.AreEqual(expected, new DbQuery(sql).QuerySingle<TReturn?>(sqlConnection));
             Assert.AreEqual(expected, new DbQuery(sql).Query<TReturn?>(sqlConnection).Single());
             Assert.AreEqual(expected, new DbQuery(sql).ExecuteScalar<TReturn?>(sqlConnection));
-            Assert.AreEqual(expected, new DbQuery(sql + " AS Value").QuerySingle<Complex<TReturn?>>(sqlConnection).Value);
+            Assert.AreEqual(expected, new DbQuery(sql + " AS Value").QuerySingle<UserType<TReturn?>>(sqlConnection).Value);
         }
 
         public static void CollectionAreEqual<TReturn>(TReturn expected, string sql) where TReturn : ICollection
@@ -53,7 +53,7 @@ namespace DbMap.Test
             CollectionAssert.AreEqual(expected, new DbQuery(sql).QuerySingle<TReturn>(sqlConnection));
             CollectionAssert.AreEqual(expected, new DbQuery(sql).Query<TReturn>(sqlConnection).Single());
             CollectionAssert.AreEqual(expected, new DbQuery(sql).ExecuteScalar<TReturn>(sqlConnection));
-            CollectionAssert.AreEqual(expected, new DbQuery(sql + " AS Value").QuerySingle<Complex<TReturn>>(sqlConnection).Value);
+            CollectionAssert.AreEqual(expected, new DbQuery(sql + " AS Value").QuerySingle<UserType<TReturn>>(sqlConnection).Value);
         }
 
         public static void IsTrue(string sql, object parameters)
@@ -63,7 +63,7 @@ namespace DbMap.Test
             Assert.IsTrue(new DbQuery(sql).QuerySingle<bool>(sqlConnection, parameters));
         }
 
-        private class Complex<TReturn>
+        private class UserType<TReturn>
         {
             public TReturn Value { get; set; }
         }
