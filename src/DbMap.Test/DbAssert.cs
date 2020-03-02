@@ -24,8 +24,8 @@ namespace DbMap.Test
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
 
-            Assert.AreEqual(expected, new DbQuery(query).ExecuteQuerySingle<TReturn>(sqlConnection));
-            Assert.AreEqual(expected, new DbQuery(query).ExecuteQuery<TReturn>(sqlConnection).Single());
+            Assert.AreEqual(expected, new DbQuery(query).QuerySingle<TReturn>(sqlConnection));
+            Assert.AreEqual(expected, new DbQuery(query).Query<TReturn>(sqlConnection).Single());
 
             if (isClrType == false)
             {
@@ -33,34 +33,34 @@ namespace DbMap.Test
             }
 
             Assert.AreEqual(expected, new DbQuery(query).ExecuteScalar<TReturn>(sqlConnection));
-            Assert.AreEqual(expected, new DbQuery(query + " AS Value").ExecuteQuerySingle<Complex<TReturn>>(sqlConnection).Value);
+            Assert.AreEqual(expected, new DbQuery(query + " AS Value").QuerySingle<Complex<TReturn>>(sqlConnection).Value);
         }
 
         public static void AreEqual<TReturn>(TReturn? expected, string sql) where TReturn: struct
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
 
-            Assert.AreEqual(expected, new DbQuery(sql).ExecuteQuerySingle<TReturn?>(sqlConnection));
-            Assert.AreEqual(expected, new DbQuery(sql).ExecuteQuery<TReturn?>(sqlConnection).Single());
+            Assert.AreEqual(expected, new DbQuery(sql).QuerySingle<TReturn?>(sqlConnection));
+            Assert.AreEqual(expected, new DbQuery(sql).Query<TReturn?>(sqlConnection).Single());
             Assert.AreEqual(expected, new DbQuery(sql).ExecuteScalar<TReturn?>(sqlConnection));
-            Assert.AreEqual(expected, new DbQuery(sql + " AS Value").ExecuteQuerySingle<Complex<TReturn?>>(sqlConnection).Value);
+            Assert.AreEqual(expected, new DbQuery(sql + " AS Value").QuerySingle<Complex<TReturn?>>(sqlConnection).Value);
         }
 
         public static void CollectionAreEqual<TReturn>(TReturn expected, string sql) where TReturn : ICollection
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
 
-            CollectionAssert.AreEqual(expected, new DbQuery(sql).ExecuteQuerySingle<TReturn>(sqlConnection));
-            CollectionAssert.AreEqual(expected, new DbQuery(sql).ExecuteQuery<TReturn>(sqlConnection).Single());
+            CollectionAssert.AreEqual(expected, new DbQuery(sql).QuerySingle<TReturn>(sqlConnection));
+            CollectionAssert.AreEqual(expected, new DbQuery(sql).Query<TReturn>(sqlConnection).Single());
             CollectionAssert.AreEqual(expected, new DbQuery(sql).ExecuteScalar<TReturn>(sqlConnection));
-            CollectionAssert.AreEqual(expected, new DbQuery(sql + " AS Value").ExecuteQuerySingle<Complex<TReturn>>(sqlConnection).Value);
+            CollectionAssert.AreEqual(expected, new DbQuery(sql + " AS Value").QuerySingle<Complex<TReturn>>(sqlConnection).Value);
         }
 
         public static void IsTrue(string sql, object parameters)
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
 
-            Assert.IsTrue(new DbQuery(sql).ExecuteQuerySingle<bool>(sqlConnection, parameters));
+            Assert.IsTrue(new DbQuery(sql).QuerySingle<bool>(sqlConnection, parameters));
         }
 
         private class Complex<TReturn>

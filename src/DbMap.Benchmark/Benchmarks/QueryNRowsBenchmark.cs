@@ -75,7 +75,7 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<int> DbQueryInt32()
         {
-            return int32Query.ExecuteQuery<int>(sqlConnection).AsList();
+            return int32Query.Query<int>(sqlConnection).AsList();
         }
 
         [Benchmark]
@@ -87,7 +87,7 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<string> DbQueryString()
         {
-            return stringQuery.ExecuteQuery<string>(sqlConnection).AsList();
+            return stringQuery.Query<string>(sqlConnection).AsList();
         }
 
         [Benchmark]
@@ -105,7 +105,7 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<Large> DbMapLarge()
         {
-            return largeQuery.ExecuteQuery<Large>(sqlConnection).AsList();
+            return largeQuery.Query<Large>(sqlConnection).AsList();
         }
     }
 }

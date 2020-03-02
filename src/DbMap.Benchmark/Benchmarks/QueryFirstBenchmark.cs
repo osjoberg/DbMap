@@ -50,7 +50,7 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public int DbQueryInt32()
         {
-            return Int32Query.ExecuteQueryFirst<int>(sqlConnection);
+            return Int32Query.QueryFirst<int>(sqlConnection);
         }
 
         [Benchmark]
@@ -62,7 +62,7 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public string DbQueryString()
         {
-            return StringQuery.ExecuteQueryFirst<string>(sqlConnection);
+            return StringQuery.QueryFirst<string>(sqlConnection);
         }
 
         [Benchmark]
@@ -80,7 +80,7 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public Large DbMapLarge()
         {
-            return LargeQuery.ExecuteQueryFirst<Large>(sqlConnection);
+            return LargeQuery.QueryFirst<Large>(sqlConnection);
         }
     }
 }

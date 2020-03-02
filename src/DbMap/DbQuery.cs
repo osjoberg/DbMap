@@ -46,6 +46,26 @@ namespace DbMap
         }
 
         /// <summary>
+        /// Execute query and return number of affected rows.
+        /// </summary>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="parameters">Query parameters.</param>
+        /// <param name="transaction">Transaction to use.</param>
+        /// <returns>Number of affected rows.</returns>
+        public int Execute(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        {
+            if (connection == null)
+            {
+                ThrowException.ValueCannotBeNull(nameof(connection));
+            }
+
+            using (var command = SetupCommand(connection, transaction, parameters))
+            {
+                return command.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
         /// Execute query and returns the first column of the first row.
         /// </summary>
         /// <typeparam name="TReturn">Type of scalar value.</typeparam>
@@ -81,7 +101,7 @@ namespace DbMap
         /// <param name="parameters">Query parameters.</param>
         /// <param name="transaction">Transaction to use.</param>
         /// <returns>All elements in the result.</returns>
-        public IEnumerable<TReturn> ExecuteQuery<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        public IEnumerable<TReturn> Query<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
         {
             if (connection == null)
             {
@@ -105,7 +125,7 @@ namespace DbMap
         /// <param name="parameters">Query parameters.</param>
         /// <param name="transaction">Transaction to use.</param>
         /// <returns>First element in the result.</returns>
-        public TReturn ExecuteQueryFirst<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        public TReturn QueryFirst<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
         {
             if (connection == null)
             {
@@ -128,7 +148,7 @@ namespace DbMap
         /// <param name="parameters">Query parameters.</param>
         /// <param name="transaction">Transaction to use.</param>
         /// <returns>First element in the result or the default value.</returns>
-        public TReturn ExecuteQueryFirstOrDefault<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        public TReturn QueryFirstOrDefault<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
         {
             if (connection == null)
             {
@@ -151,7 +171,7 @@ namespace DbMap
         /// <param name="parameters">Query parameters.</param>
         /// <param name="transaction">Transaction to use.</param>
         /// <returns>Single element in the result.</returns>
-        public TReturn ExecuteQuerySingle<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        public TReturn QuerySingle<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
         {
             if (connection == null)
             {
@@ -174,7 +194,7 @@ namespace DbMap
         /// <param name="parameters">Query parameters.</param>
         /// <param name="transaction">Transaction to use.</param>
         /// <returns>Single element in the result or the default value.</returns>
-        public TReturn ExecuteQuerySingleOrDefault<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        public TReturn QuerySingleOrDefault<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
         {
             if (connection == null)
             {
@@ -186,26 +206,6 @@ namespace DbMap
             {
                 SetupDataReaderDeserializer(typeof(TReturn), reader);
                 return DbQueryInternal.QuerySingleOrDefault<TReturn>(reader, dataReaderDeserializer);
-            }
-        }
-
-        /// <summary>
-        /// Execute query and return number of affected rows.
-        /// </summary>
-        /// <param name="connection">Database connection.</param>
-        /// <param name="parameters">Query parameters.</param>
-        /// <param name="transaction">Transaction to use.</param>
-        /// <returns>Number of affected rows.</returns>
-        public int Execute(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
-        {
-            if (connection == null)
-            {
-                ThrowException.ValueCannotBeNull(nameof(connection));
-            }
-
-            using (var command = SetupCommand(connection, transaction, parameters))
-            {
-                return command.ExecuteNonQuery();
             }
         }
 
