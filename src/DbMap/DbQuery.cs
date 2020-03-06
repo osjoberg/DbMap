@@ -24,7 +24,6 @@ namespace DbMap
 
         private Type returnType;
         private Type parametersType;
-        private Type dataParameterType;
         private Type connectionType;
 
         /// <summary>
@@ -89,7 +88,7 @@ namespace DbMap
                 }
 
                 var scalar = command.ExecuteScalar();
-                return scalarDeserializer.Deserialize<TReturn>(scalar);
+                return scalarDeserializer.Deserialize<TReturn>(scalar); 
             }
         }
 
@@ -217,8 +216,8 @@ namespace DbMap
             }
 
             returnType = type;
-            var columnNames = DbQueryInternal.IsClrType(returnType) ? null : DbQueryInternal.GetColumnNames(reader);
-            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(returnType, columnNames);
+            var columnNames = DbQueryInternal.IsClrType(type) ? null : DbQueryInternal.GetColumnNames(reader);
+            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(type, columnNames);
         }
 
         private IDbCommand SetupCommand(IDbConnection connection, IDbTransaction transaction, object parameters)
@@ -257,7 +256,7 @@ namespace DbMap
                     ThrowException.NotSupported();
                 }
 
-                dataParameterType = command.CreateParameter().GetType();
+                var dataParameterType = command.CreateParameter().GetType();
                 parametersSerializer = ParametersSerializerCache.GetCachedOrBuildNew(dataParameterType, parametersType);
             }
 

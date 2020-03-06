@@ -43,7 +43,7 @@ namespace DbMap.Infrastructure
         public static string[] GetColumnNames(DbDataReader reader)
         {
             var columnNames = new string[reader.FieldCount];
-            for (var ordinal = 0; ordinal < reader.FieldCount; ordinal++)
+            for (var ordinal = 0; ordinal < columnNames.Length; ordinal++)
             {
                 columnNames[ordinal] = reader.GetName(ordinal);
             }
