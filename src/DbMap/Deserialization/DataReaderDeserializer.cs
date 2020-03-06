@@ -11,25 +11,6 @@ namespace DbMap.Deserialization
 {
     public abstract class DataReaderDeserializer
     {
-        private static readonly Type DbDataReaderType = typeof(DbDataReader);
-        private static readonly Type[] DbDataReaderTypeArray = { DbDataReaderType };
-        private static readonly MethodInfo DbDataReaderRead = DbDataReaderType.GetMethod(nameof(DbDataReader.Read));
-        private static readonly MethodInfo DbDataReaderDispose = DbDataReaderType.GetMethod(nameof(DbDataReader.Dispose));
-        private static readonly MethodInfo DbDataReaderIsDBNull = DbDataReaderType.GetMethod(nameof(DbDataReader.IsDBNull));
-        private static readonly MethodInfo DbDataReaderGetBoolean = DbDataReaderType.GetMethod(nameof(DbDataReader.GetBoolean));
-        private static readonly MethodInfo DbDataReaderGetByte = DbDataReaderType.GetMethod(nameof(DbDataReader.GetByte));
-        private static readonly MethodInfo DbDataReaderGetChar = DbDataReaderType.GetMethod(nameof(DbDataReader.GetChar));
-        private static readonly MethodInfo DbDataReaderGetDateTime = DbDataReaderType.GetMethod(nameof(DbDataReader.GetDateTime));
-        private static readonly MethodInfo DbDataReaderGetDecimal = DbDataReaderType.GetMethod(nameof(DbDataReader.GetDecimal));
-        private static readonly MethodInfo DbDataReaderGetDouble = DbDataReaderType.GetMethod(nameof(DbDataReader.GetDouble));
-        private static readonly MethodInfo DbDataReaderGetInt16 = DbDataReaderType.GetMethod(nameof(DbDataReader.GetInt16));
-        private static readonly MethodInfo DbDataReaderGetInt32 = DbDataReaderType.GetMethod(nameof(DbDataReader.GetInt32));
-        private static readonly MethodInfo DbDataReaderGetInt64 = DbDataReaderType.GetMethod(nameof(DbDataReader.GetInt64));
-        private static readonly MethodInfo DbDataReaderGetFloat = DbDataReaderType.GetMethod(nameof(DbDataReader.GetFloat));
-        private static readonly MethodInfo DbDataReaderGetString = DbDataReaderType.GetMethod(nameof(DbDataReader.GetString));
-        private static readonly MethodInfo DbDataReaderGetGuid = DbDataReaderType.GetMethod(nameof(DbDataReader.GetGuid));
-        private static readonly MethodInfo DbDataReaderGetValue = DbDataReaderType.GetMethod(nameof(DbDataReader.GetValue));
-
         public abstract TReturn Deserialize<TReturn>(DbDataReader reader);
 
         public abstract IEnumerable<TReturn> DeserializeAll<TReturn>(DbDataReader reader);
@@ -45,27 +26,27 @@ namespace DbMap.Deserialization
 
             var typeBuilder = moduleBuilder.DefineType(typeName, TypeAttributes.Public | TypeAttributes.Sealed, dataReaderDeserializerType, new[] { enumeratorType, enumerableType });
 
-            // Field.
-            var readerField = typeBuilder.DefineField("reader", DbDataReaderType, FieldAttributes.Private);
+            // Fields
+            var readerField = typeBuilder.DefineField("reader", DbDataReaderMetadata.Type, FieldAttributes.Private);
 
-            // Constructor.
+            // ctor()
             {
                 var constructor = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
                 var il = constructor.GetILGenerator();
                 il.Emit(OpCodes.Ret);
             }
 
-            // Constructor (IDataReader).
-            var dataReaderConstructor = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, DbDataReaderTypeArray);
+            // .ctor(IDataReader)
+            var dataReaderDeserializerConstructor = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, DbDataReaderMetadata.TypeArray);
             {
-                var il = dataReaderConstructor.GetILGenerator();
+                var il = dataReaderDeserializerConstructor.GetILGenerator();
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldarg_1);
                 il.Emit(OpCodes.Stfld, readerField);
                 il.Emit(OpCodes.Ret);
             }
 
-            // Reset().
+            // Reset()
             {
                 var method = typeBuilder.DefineMethod("Reset", MethodAttributes.Public | MethodAttributes.Virtual);
                 var il = method.GetILGenerator();
@@ -73,34 +54,34 @@ namespace DbMap.Deserialization
                 il.Emit(OpCodes.Ret);
             }
 
-            // Dispose().
+            // Dispose()
             {
                 var method = typeBuilder.DefineMethod("Dispose", MethodAttributes.Public | MethodAttributes.Virtual);
                 var il = method.GetILGenerator();
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldfld, readerField);
-                il.Emit(OpCodes.Callvirt, DbDataReaderDispose);
+                il.Emit(OpCodes.Callvirt, DbDataReaderMetadata.Dispose);
                 il.Emit(OpCodes.Ret);
             }
 
-            // MoveNext().
+            // MoveNext()
             {
                 var method = typeBuilder.DefineMethod("MoveNext", MethodAttributes.Public | MethodAttributes.Virtual, typeof(bool), Type.EmptyTypes);
                 var il = method.GetILGenerator();
 
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldfld, readerField);
-                il.Emit(OpCodes.Callvirt, DbDataReaderRead);
+                il.Emit(OpCodes.Callvirt, DbDataReaderMetadata.Read);
                 il.Emit(OpCodes.Ret);
             }
 
-            // Deserialize method
+            // TReturn Deserialize<TReturn>(DBDataReader)
             var deserializeMethod = typeBuilder.DefineMethod(nameof(Deserialize), MethodAttributes.Public | MethodAttributes.Virtual);
             {
                 var returnTypeParameter = deserializeMethod.DefineGenericParameters("TReturn")[0];
 
                 deserializeMethod.SetReturnType(returnTypeParameter);
-                deserializeMethod.SetParameters(DbDataReaderTypeArray);
+                deserializeMethod.SetParameters(DbDataReaderMetadata.TypeArray);
 
                 var il = deserializeMethod.GetILGenerator();
                 var locals = new LocalsMap(il);
@@ -108,21 +89,21 @@ namespace DbMap.Deserialization
                 il.Emit(OpCodes.Ret);
             }
 
-            // DeserializeAll method
+            // IEnumerable<TReturn> DeserializeAll<TReturn>(DBDataReader)
             {
                 var deserializeAllMethod = typeBuilder.DefineMethod(nameof(DeserializeAll), MethodAttributes.Public | MethodAttributes.Virtual);
                 var returnTypeParameter = deserializeAllMethod.DefineGenericParameters("TReturn")[0];
 
                 deserializeAllMethod.SetReturnType(typeof(IEnumerable<>).MakeGenericType(returnTypeParameter));
-                deserializeAllMethod.SetParameters(DbDataReaderTypeArray);
+                deserializeAllMethod.SetParameters(DbDataReaderMetadata.TypeArray);
 
                 var il = deserializeAllMethod.GetILGenerator();
                 il.Emit(OpCodes.Ldarg_1);
-                il.Emit(OpCodes.Newobj, dataReaderConstructor);
+                il.Emit(OpCodes.Newobj, dataReaderDeserializerConstructor);
                 il.Emit(OpCodes.Ret);
             }
 
-            // Current property (T).
+            // TReturn Current { get; }
             {
                 var property = typeBuilder.DefineProperty("Current", PropertyAttributes.None, type, Type.EmptyTypes);
                 var propertyGet = typeBuilder.DefineMethod("get_Current", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Virtual, type, Type.EmptyTypes);
@@ -137,7 +118,7 @@ namespace DbMap.Deserialization
                 property.SetGetMethod(propertyGet);
             }
 
-            // Current property (object).
+            // object Current { get; }
             {
                 var property = typeBuilder.DefineProperty("Current", PropertyAttributes.HasDefault, typeof(object), Type.EmptyTypes);
                 var propertyGet = typeBuilder.DefineMethod("get_Current", MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.Virtual, typeof(object), Type.EmptyTypes);
@@ -153,7 +134,7 @@ namespace DbMap.Deserialization
                 property.SetGetMethod(propertyGet);
             }
 
-            // GetEnumerator method (IEnumerator<TReturn>)
+            // IEnumerator<TReturn> GetEnumerator()
             {
                 var method = typeBuilder.DefineMethod("GetEnumerator", MethodAttributes.Public | MethodAttributes.Virtual, enumeratorType, Type.EmptyTypes);
                 var il = method.GetILGenerator();
@@ -161,7 +142,7 @@ namespace DbMap.Deserialization
                 il.Emit(OpCodes.Ret);
             }
 
-            // GetEnumerator method (IEnumerator)
+            // IEnumerator GetEnumerator()
             {
                 var method = typeBuilder.DefineMethod("GetEnumerator", MethodAttributes.Public | MethodAttributes.Virtual, typeof(IEnumerator), Type.EmptyTypes);
                 var il = method.GetILGenerator();
@@ -187,7 +168,7 @@ namespace DbMap.Deserialization
 
         private static void EmitDeserializeClrType(ILGenerator il, LocalsMap locals, Type type)
         {
-            EmitGetValue(il, locals, type, 0);
+            new DataReaderValueDeserializer(type, 0).EmitDeserializeClrType(il, locals);
         }
 
         private static void EmitDeserializeUserType(ILGenerator il, LocalsMap locals, Type type, string[] columnNames)
@@ -197,6 +178,8 @@ namespace DbMap.Deserialization
             {
                 ThrowException.NoDefaultConstructor();
             }
+
+            var sample = Activator.CreateInstance(type);
 
             il.Emit(OpCodes.Newobj, constructor);
 
@@ -208,162 +191,21 @@ namespace DbMap.Deserialization
                     continue;
                 }
 
-                if (propertyInfo.CanWrite == false || propertyInfo.GetSetMethod() == null)
+                if (propertyInfo.CanWrite && propertyInfo.GetSetMethod() != null)
                 {
-                    var backingField = type.GetField("<" + propertyInfo.Name + ">k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-                    if (backingField == null)
-                    {
-                        continue;
-                    }
-
-                    il.Emit(OpCodes.Dup);
-                    EmitGetValue(il, locals, backingField.FieldType, ordinal);
-                    il.Emit(OpCodes.Stfld, backingField);
+                    var propertyIsNullInitialized = propertyInfo.CanRead && propertyInfo.GetValue(sample) == null;
+                    var dataReaderPropertyValueDeserializer = new DataReaderValueDeserializer(propertyInfo, ordinal);
+                    dataReaderPropertyValueDeserializer.EmitDeserializeProperty(il, locals, propertyIsNullInitialized);
+                    continue;
                 }
-                else
+                
+                var fieldInfo = type.GetField("<" + propertyInfo.Name + ">k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (fieldInfo != null)
                 {
-                    il.Emit(OpCodes.Dup);
-                    EmitGetValue(il, locals, propertyInfo.PropertyType, ordinal);
-                    il.Emit(OpCodes.Callvirt, propertyInfo.GetSetMethod());
+                    var fieldIsNullInitialized = fieldInfo.GetValue(sample) == null;
+                    var dataReaderFieldValueDeserializer = new DataReaderValueDeserializer(fieldInfo, ordinal);
+                    dataReaderFieldValueDeserializer.EmitDeserializeProperty(il, locals, fieldIsNullInitialized);
                 }
-            }
-        }
-
-        private static void EmitGetValue(ILGenerator il, LocalsMap locals, Type type, int ordinal)
-        {
-            var nullableInfo = NullableInfo.GetNullable(type);
-            var underlyingType = nullableInfo?.UnderlyingType ?? type;
-
-            var getValueMethod = GetGetValueMethodFromType(underlyingType);
-            if (getValueMethod == null)
-            {
-                ThrowException.NotSupported();
-            }
-
-            if (nullableInfo != null)
-            {
-                var localIndex = locals.GetLocalIndex(type, "nullable") ?? locals.DeclareLocal(type, "nullable");
-                EmitGetNullableValue(il, getValueMethod, ordinal, localIndex, nullableInfo);
-            }
-            else if (type.IsClass)
-            {
-                EmitGetReferenceValue(il, getValueMethod, ordinal);
-            }
-            else
-            {
-                EmitGetStackAllocatedValue(il, getValueMethod, ordinal);
-            }
-        }
-
-        private static void EmitGetNullableValue(ILGenerator il, MethodInfo getValueMethod, int ordinal, int localIndex, NullableInfo nullableInfo)
-        {
-            var isNotDbNullLabel = il.DefineLabel();
-            var completeLabel = il.DefineLabel();
-
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Ldc_I4_S, ordinal);
-            il.Emit(OpCodes.Callvirt, DbDataReaderIsDBNull);
-            il.Emit(OpCodes.Brfalse_S, isNotDbNullLabel);
-
-            // Null
-            {
-                il.Emit(OpCodes.Ldloc_S, localIndex);
-                il.Emit(OpCodes.Br_S, completeLabel);
-            }
-
-            // Not null
-            {
-                il.MarkLabel(isNotDbNullLabel);
-                EmitGetStackAllocatedValue(il, getValueMethod, ordinal);
-                il.Emit(OpCodes.Newobj, nullableInfo.Constructor);
-            }
-
-            il.MarkLabel(completeLabel);
-        }
-
-        private static void EmitGetReferenceValue(ILGenerator il, MethodInfo getValueMethod, int ordinal)
-        {
-            var isNotDbNullLabel = il.DefineLabel();
-            var completeLabel = il.DefineLabel();
-
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Ldc_I4_S, ordinal);
-            il.Emit(OpCodes.Callvirt, DbDataReaderIsDBNull);
-            il.Emit(OpCodes.Brfalse_S, isNotDbNullLabel);
-
-            // Null
-            {
-                il.Emit(OpCodes.Ldnull);
-                il.Emit(OpCodes.Br_S, completeLabel);
-            }
-
-            // Not null
-            {
-                il.MarkLabel(isNotDbNullLabel);
-                il.Emit(OpCodes.Ldarg_1);
-                il.Emit(OpCodes.Ldc_I4_S, ordinal);
-                il.Emit(OpCodes.Callvirt, getValueMethod);
-            }
-
-            il.MarkLabel(completeLabel);
-        }
-
-        private static void EmitGetStackAllocatedValue(ILGenerator il, MethodInfo getValueMethod, int ordinal)
-        {
-            il.Emit(OpCodes.Ldarg_1);
-            il.Emit(OpCodes.Ldc_I4_S, ordinal);
-            il.Emit(OpCodes.Callvirt, getValueMethod);
-        }
-
-        private static MethodInfo GetGetValueMethodFromType(Type underlyingType)
-        {
-            switch (Type.GetTypeCode(underlyingType))
-            {
-                case TypeCode.Boolean:
-                    return DbDataReaderGetBoolean;
-
-                case TypeCode.Byte:
-                    return DbDataReaderGetByte;
-
-                case TypeCode.Char:
-                    return DbDataReaderGetChar;
-
-                case TypeCode.DateTime:
-                    return DbDataReaderGetDateTime;
-
-                case TypeCode.Decimal:
-                    return DbDataReaderGetDecimal;
-
-                case TypeCode.Double:
-                    return DbDataReaderGetDouble;
-
-                case TypeCode.Int16:
-                    return DbDataReaderGetInt16;
-
-                case TypeCode.Int32:
-                    return DbDataReaderGetInt32;
-
-                case TypeCode.Int64:
-                    return DbDataReaderGetInt64;
-
-                case TypeCode.Single:
-                    return DbDataReaderGetFloat;
-
-                case TypeCode.String:
-                    return DbDataReaderGetString;
-
-                default:
-                    if (underlyingType.IsArray)
-                    {
-                        return DbDataReaderGetValue;
-                    }
-
-                    if (ReferenceEquals(underlyingType, typeof(Guid)))
-                    {
-                        return DbDataReaderGetGuid;
-                    }
-
-                    return null;
             }
         }
     }
