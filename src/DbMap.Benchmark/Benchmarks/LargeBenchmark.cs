@@ -60,7 +60,7 @@ namespace DbMap.Benchmark.Benchmarks
             return sqlConnection.ExecuteQuery<Large>(LargeSql, LargeParameters).AsList();
         }
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public List<Large> DbMapLarge()
         {
             return LargeQuery.Query<Large>(sqlConnection, LargeParameters).AsList();

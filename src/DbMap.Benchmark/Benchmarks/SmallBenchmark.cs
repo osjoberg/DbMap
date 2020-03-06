@@ -60,7 +60,7 @@ namespace DbMap.Benchmark.Benchmarks
             return sqlConnection.ExecuteQuery<Small>(SmallSql, SmallParameters).AsList();
         }
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public List<Small> DbMapSmall()
         {
             return SmallQuery.Query<Small>(sqlConnection, SmallParameters).AsList();

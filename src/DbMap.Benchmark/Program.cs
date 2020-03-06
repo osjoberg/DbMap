@@ -15,8 +15,10 @@ namespace DbMap.Benchmark
         {
             DatabaseInitialize.Initialize();
             
+            Run<SmallBenchmark>();
+            Run<MediumBenchmark>();
             Run<LargeBenchmark>();
-            //BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+
             Console.ReadLine();
         }
 

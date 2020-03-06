@@ -60,7 +60,7 @@ namespace DbMap.Benchmark.Benchmarks
             return sqlConnection.ExecuteQuery<Medium>(MediumSql, MediumParameters).AsList();
         }
 
-        [Benchmark]
+        [Benchmark(Baseline = true)]
         public List<Medium> DbMapMedium()
         {
             return MediumQuery.Query<Medium>(sqlConnection, MediumParameters).AsList();
