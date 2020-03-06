@@ -24,36 +24,56 @@ namespace DbMap.Test
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
 
-            Assert.AreEqual(expected, new DbQuery(query).QuerySingle<TReturn>(sqlConnection));
-            Assert.AreEqual(expected, new DbQuery(query).Query<TReturn>(sqlConnection).Single());
+            var actualQuerySingle = new DbQuery(query).QuerySingle<TReturn>(sqlConnection);
+            Assert.AreEqual(expected, actualQuerySingle);
+
+            var actualQuery = new DbQuery(query).Query<TReturn>(sqlConnection).Single();
+            Assert.AreEqual(expected, actualQuery);
 
             if (isClrType == false)
             {
                 return;
             }
 
-            Assert.AreEqual(expected, new DbQuery(query).ExecuteScalar<TReturn>(sqlConnection));
-            Assert.AreEqual(expected, new DbQuery(query + " AS Value").QuerySingle<UserType<TReturn>>(sqlConnection).Value);
+            var actualScalar = new DbQuery(query).ExecuteScalar<TReturn>(sqlConnection);
+            Assert.AreEqual(expected, actualScalar);
+
+            var actualUserType = new DbQuery(query + " AS Value").QuerySingle<UserType<TReturn>>(sqlConnection).Value;
+            Assert.AreEqual(expected, actualUserType);
         }
 
         public static void AreEqual<TReturn>(TReturn? expected, string sql) where TReturn: struct
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
 
-            Assert.AreEqual(expected, new DbQuery(sql).QuerySingle<TReturn?>(sqlConnection));
-            Assert.AreEqual(expected, new DbQuery(sql).Query<TReturn?>(sqlConnection).Single());
-            Assert.AreEqual(expected, new DbQuery(sql).ExecuteScalar<TReturn?>(sqlConnection));
-            Assert.AreEqual(expected, new DbQuery(sql + " AS Value").QuerySingle<UserType<TReturn?>>(sqlConnection).Value);
+            var actualQuerySingle = new DbQuery(sql).QuerySingle<TReturn?>(sqlConnection);
+            Assert.AreEqual(expected, actualQuerySingle);
+
+            var actualQuery = new DbQuery(sql).Query<TReturn?>(sqlConnection).Single();
+            Assert.AreEqual(expected, actualQuery);
+
+            var actualScalar = new DbQuery(sql).ExecuteScalar<TReturn?>(sqlConnection);
+            Assert.AreEqual(expected, actualScalar);
+
+            var actualUserType = new DbQuery(sql + " AS Value").QuerySingle<UserType<TReturn?>>(sqlConnection).Value;
+            Assert.AreEqual(expected, actualUserType);
         }
 
         public static void CollectionAreEqual<TReturn>(TReturn expected, string sql) where TReturn : ICollection
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
 
-            CollectionAssert.AreEqual(expected, new DbQuery(sql).QuerySingle<TReturn>(sqlConnection));
-            CollectionAssert.AreEqual(expected, new DbQuery(sql).Query<TReturn>(sqlConnection).Single());
-            CollectionAssert.AreEqual(expected, new DbQuery(sql).ExecuteScalar<TReturn>(sqlConnection));
-            CollectionAssert.AreEqual(expected, new DbQuery(sql + " AS Value").QuerySingle<UserType<TReturn>>(sqlConnection).Value);
+            var actualQuerySingle = new DbQuery(sql).QuerySingle<TReturn>(sqlConnection);
+            CollectionAssert.AreEqual(expected, actualQuerySingle);
+
+            var actualQuery = new DbQuery(sql).Query<TReturn>(sqlConnection).Single();
+            CollectionAssert.AreEqual(expected, actualQuery);
+
+            var actualScalar = new DbQuery(sql).ExecuteScalar<TReturn>(sqlConnection);
+            CollectionAssert.AreEqual(expected, actualScalar);
+
+            var actualUserType = new DbQuery(sql + " AS Value").QuerySingle<UserType<TReturn>>(sqlConnection).Value;
+            CollectionAssert.AreEqual(expected, actualUserType);
         }
 
         public static void IsTrue(string sql, object parameters)
