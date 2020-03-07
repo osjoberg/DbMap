@@ -47,30 +47,30 @@ class Program
 
 Small benchmark, query 1 row of 6 columns using 1 parameter
 ```cmd
-|      Method |     Mean |   Error |  StdDev |
-|------------ |---------:|--------:|--------:|
-| EFCoreSmall | 163.3 us | 2.72 us | 5.92 us | => ~ 46% slower than DbMap
-| DapperSmall | 141.2 us | 3.19 us | 6.92 us | => ~ 26% slower than DbMap
-| RepoDbSmall | 122.6 us | 1.45 us | 3.05 us | => ~ 15% slower than DbMap
-|  DbMapSmall | 103.4 us | 1.31 us | 2.79 us |
+|      Method |     Mean |   Error |  StdDev | Ratio | RatioSD |
+|------------ |---------:|--------:|--------:|------:|--------:|
+| EFCoreSmall | 157.4 us | 0.99 us | 2.09 us |  1.56 |    0.02 |
+| DapperSmall | 134.1 us | 0.81 us | 1.67 us |  1.33 |    0.02 |
+| RepoDbSmall | 120.2 us | 1.30 us | 2.71 us |  1.19 |    0.03 |
+|  DbMapSmall | 100.7 us | 0.47 us | 0.99 us |  1.00 |    0.00 |
 ```
 
 Medium benchmark, query 100 rows of 10 columns using 5 parameters
 ```cmd
-|       Method |     Mean |    Error |   StdDev |
-|------------- |---------:|---------:|---------:|
-| EFCoreMedium | 382.8 us |  7.52 us | 16.04 us | => ~ 17% slower than DbMap
-| DapperMedium | 387.6 us | 17.32 us | 38.02 us | => ~ 18% slower than DbMap
-| RepoDbMedium | 334.9 us | 10.50 us | 23.05 us | => ~  5% slower than DbMap
-|  DbMapMedium | 315.0 us | 14.70 us | 31.95 us |
+|       Method |     Mean |    Error |   StdDev | Ratio | RatioSD |
+|------------- |---------:|---------:|---------:|------:|--------:|
+| EFCoreMedium | 399.0 us | 13.59 us | 30.40 us |  1.30 |    0.15 |
+| DapperMedium | 368.9 us | 12.88 us | 27.18 us |  1.21 |    0.13 |
+| RepoDbMedium | 363.5 us | 18.94 us | 42.35 us |  1.20 |    0.18 |
+|  DbMapMedium | 307.2 us | 13.18 us | 28.38 us |  1.00 |    0.00 |
 ```
 
 Large benchmark, query 10.000 rows of 22 columns using 10 parameters
 ```cmd
-|      Method |     Mean |    Error |   StdDev |
-|------------ |---------:|---------:|---------:|
-| EFCoreLarge | 46.16 ms | 0.661 ms | 1.394 ms | => ~ 16% slower than DbMap
-| DapperLarge | 46.33 ms | 0.398 ms | 0.840 ms | => ~ 16% slower than DbMap
-| RepoDbLarge | 40.40 ms | 0.381 ms | 0.805 ms | => ~  5% slower than DbMap
-|  DbMapLarge | 38.04 ms | 0.382 ms | 0.813 ms |
+|      Method |     Mean |    Error |   StdDev | Ratio | RatioSD |
+|------------ |---------:|---------:|---------:|------:|--------:|
+| EFCoreLarge | 42.75 ms | 0.452 ms | 0.945 ms |  1.25 |    0.04 |
+| DapperLarge | 42.48 ms | 0.309 ms | 0.639 ms |  1.24 |    0.04 |
+| RepoDbLarge | 37.14 ms | 0.277 ms | 0.585 ms |  1.09 |    0.03 |
+|  DbMapLarge | 34.23 ms | 0.393 ms | 0.846 ms |  1.00 |    0.00 |
 ```
