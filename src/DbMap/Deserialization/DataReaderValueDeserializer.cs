@@ -93,26 +93,20 @@ namespace DbMap.Deserialization
 
         private void EmitGetValueOrNull(ILGenerator il, LocalsMap locals)
         {
-            var isNotDbNullLabel = il.DefineLabel();
-            var completeLabel = il.DefineLabel();
+             var completeLabel = il.DefineLabel();
 
-            il.Invoke(DbDataReaderMetadata.IsDBNull, ordinal);
-            il.Emit(OpCodes.Brfalse_S, isNotDbNullLabel);
+             EmitNull(il, locals);
+             il.Invoke(DbDataReaderMetadata.IsDBNull, ordinal);
+             il.Emit(OpCodes.Brtrue_S, completeLabel);
 
-            // Null
-            {
-                EmitNull(il, locals);
-                il.Emit(OpCodes.Br_S, completeLabel);
-            }
+             // Not null
+             {
+                 il.Emit(OpCodes.Pop);
+                 il.Invoke(getValueMethod, ordinal);
+                 EmitWrapNullable(il);
+             }
 
-            // Not null
-            {
-                il.MarkLabel(isNotDbNullLabel);
-                il.Invoke(getValueMethod, ordinal);
-                EmitWrapNullable(il);
-            }
-
-            il.MarkLabel(completeLabel);
+             il.MarkLabel(completeLabel);
         }
 
         private void EmitNull(ILGenerator il, LocalsMap locals)
