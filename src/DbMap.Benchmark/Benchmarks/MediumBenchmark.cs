@@ -7,6 +7,7 @@ using BenchmarkDotNet.Attributes;
 using Dapper;
 
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 using RepoDb;
 
@@ -17,6 +18,7 @@ namespace DbMap.Benchmark.Benchmarks
     {
         private static readonly string MediumSql = $"SELECT {string.Join(", ", Medium.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Medium";
         private static readonly object MediumParameters = new { p1 = 1, p2 = 2, p3 = 3, p4 = 4, p5 = 5 };
+        private static readonly object[] MediumParametersArray = { 1, 2, 3, 4, 5 };
         private static readonly DbQuery MediumQuery = new DbQuery(MediumSql);
 
         private SqlConnection sqlConnection;
@@ -43,9 +45,15 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public List<Medium> EFCoreMedium()
+        public List<Medium> EFCoreMediumLinq()
         {
             return dbMapDbContext.Medium.AsList();
+        }
+
+        [Benchmark]
+        public List<Medium> EFCoreMedium()
+        {
+            return dbMapDbContext.Medium.FromSqlRaw(MediumSql, MediumParametersArray).AsList();
         }
 
         [Benchmark]

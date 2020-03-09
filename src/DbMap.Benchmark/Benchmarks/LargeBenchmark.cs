@@ -7,6 +7,7 @@ using BenchmarkDotNet.Attributes;
 using Dapper;
 
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 using RepoDb;
 
@@ -17,6 +18,7 @@ namespace DbMap.Benchmark.Benchmarks
     {
         private static readonly string LargeSql = $"SELECT {string.Join(", ", Large.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Large";
         private static readonly object LargeParameters = new { p1 = 1, p2 = 2, p3 = 3, p4 = 4, p5 = 5, p6 = 6, p7 = 7, p8 = 8, p9 = 9, p10 = 10 };
+        private static readonly object[] LargeParametersArray = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
         private static readonly DbQuery LargeQuery = new DbQuery(LargeSql);
 
         private SqlConnection sqlConnection;
@@ -43,9 +45,15 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public List<Large> EFCoreLarge()
+        public List<Large> EFCoreLargeLinq()
         {
             return dbMapDbContext.Large.AsList();
+        }
+
+        [Benchmark]
+        public List<Large> EFCoreLarge()
+        {
+            return dbMapDbContext.Large.FromSqlRaw(LargeSql, LargeParametersArray).AsList();
         }
 
         [Benchmark]

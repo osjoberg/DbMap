@@ -7,6 +7,7 @@ using BenchmarkDotNet.Attributes;
 using Dapper;
 
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 using RepoDb;
 
@@ -17,6 +18,7 @@ namespace DbMap.Benchmark.Benchmarks
     {
         private static readonly string SmallSql = $"SELECT {string.Join(", ", Small.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Small";
         private static readonly object SmallParameters = new { p1 = 1 };
+        private static readonly object[] SmallParametersArray = { 1 };
         private static readonly DbQuery SmallQuery = new DbQuery(SmallSql);
 
         private SqlConnection sqlConnection;
@@ -43,9 +45,15 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public List<Small> EFCoreSmall()
+        public List<Small> EFCoreSmallLinq()
         {
             return dbMapDbContext.Small.AsList();
+        }
+
+        [Benchmark]
+        public List<Small> EFCoreSmall()
+        {
+            return dbMapDbContext.Small.FromSqlRaw(SmallSql, SmallParametersArray).AsList();
         }
 
         [Benchmark]

@@ -47,30 +47,34 @@ class Program
 
 Small benchmark, query 1 row of 6 columns using 1 parameter
 ```cmd
-|      Method |     Mean |   Error |  StdDev | Ratio | RatioSD |
-|------------ |---------:|--------:|--------:|------:|--------:|
-| EFCoreSmall | 157.4 us | 0.99 us | 2.09 us |  1.56 |    0.02 |
-| DapperSmall | 134.1 us | 0.81 us | 1.67 us |  1.33 |    0.02 |
-| RepoDbSmall | 120.2 us | 1.30 us | 2.71 us |  1.19 |    0.03 |
-|  DbMapSmall | 100.7 us | 0.47 us | 0.99 us |  1.00 |    0.00 |
+|          Method |     Mean |   Error |   StdDev |   Median | Ratio | RatioSD |
+|---------------- |---------:|--------:|---------:|---------:|------:|--------:|
+| EFCoreSmallLinq | 161.5 us | 5.28 us | 10.78 us | 158.9 us |  1.60 |    0.11 |
+|     EFCoreSmall | 251.6 us | 5.99 us | 13.39 us | 256.8 us |  2.48 |    0.13 |
+|     DapperSmall | 133.0 us | 0.56 us |  1.17 us | 132.7 us |  1.31 |    0.02 |
+|     RepoDbSmall | 120.4 us | 1.43 us |  3.01 us | 120.3 us |  1.19 |    0.03 |
+|      DbMapSmall | 101.2 us | 0.56 us |  1.19 us | 101.1 us |  1.00 |    0.00 |
 ```
 
 Medium benchmark, query 100 rows of 10 columns using 5 parameters
 ```cmd
-|       Method |     Mean |    Error |   StdDev | Ratio | RatioSD |
-|------------- |---------:|---------:|---------:|------:|--------:|
-| EFCoreMedium | 399.0 us | 13.59 us | 30.40 us |  1.30 |    0.15 |
-| DapperMedium | 368.9 us | 12.88 us | 27.18 us |  1.21 |    0.13 |
-| RepoDbMedium | 363.5 us | 18.94 us | 42.35 us |  1.20 |    0.18 |
-|  DbMapMedium | 307.2 us | 13.18 us | 28.38 us |  1.00 |    0.00 |
+|           Method |     Mean |    Error |   StdDev |   Median | Ratio | RatioSD |
+|----------------- |---------:|---------:|---------:|---------:|------:|--------:|
+| EFCoreMediumLinq | 393.2 us | 12.54 us | 27.53 us | 387.4 us |  1.25 |    0.17 |
+|     EFCoreMedium | 478.0 us | 11.14 us | 24.69 us | 477.1 us |  1.53 |    0.21 |
+|     DapperMedium | 367.7 us | 12.26 us | 26.65 us | 359.6 us |  1.17 |    0.14 |
+|     RepoDbMedium | 342.0 us | 20.77 us | 45.15 us | 326.9 us |  1.09 |    0.17 |
+|      DbMapMedium | 318.3 us | 18.36 us | 40.31 us | 302.1 us |  1.00 |    0.00 |
 ```
 
 Large benchmark, query 10.000 rows of 22 columns using 10 parameters
 ```cmd
-|      Method |     Mean |    Error |   StdDev | Ratio | RatioSD |
-|------------ |---------:|---------:|---------:|------:|--------:|
-| EFCoreLarge | 42.75 ms | 0.452 ms | 0.945 ms |  1.25 |    0.04 |
-| DapperLarge | 42.48 ms | 0.309 ms | 0.639 ms |  1.24 |    0.04 |
-| RepoDbLarge | 37.14 ms | 0.277 ms | 0.585 ms |  1.09 |    0.03 |
-|  DbMapLarge | 34.23 ms | 0.393 ms | 0.846 ms |  1.00 |    0.00 |
+|          Method |     Mean |    Error |   StdDev | Ratio | RatioSD |
+|---------------- |---------:|---------:|---------:|------:|--------:|
+| EFCoreLargeLinq | 42.56 ms | 0.443 ms | 0.924 ms |  1.26 |    0.04 |
+|     EFCoreLarge | 41.86 ms | 0.443 ms | 0.933 ms |  1.24 |    0.04 |
+|     DapperLarge | 43.04 ms | 0.410 ms | 0.864 ms |  1.27 |    0.05 |
+|     RepoDbLarge | 37.17 ms | 0.350 ms | 0.737 ms |  1.10 |    0.03 |
+|      DbMapLarge | 33.83 ms | 0.415 ms | 0.894 ms |  1.00 |    0.00 |
+
 ```
