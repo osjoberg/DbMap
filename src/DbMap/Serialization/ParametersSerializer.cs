@@ -27,12 +27,7 @@ namespace DbMap.Serialization
                 var il = method.GetILGenerator();
 
                 var locals = new LocalsMap(il);
-                locals.DeclareLocal(parametersType, "parameters");
-
-                il.Emit(OpCodes.Ldarg_2);
-                il.Emit(OpCodes.Castclass, parametersType);
-                il.Emit(OpCodes.Stloc_0);
-
+                
                 var properties = parametersType.GetProperties();
                 for (var parameterIndex = 0; parameterIndex < properties.Length; parameterIndex++)
                 {
@@ -48,14 +43,14 @@ namespace DbMap.Serialization
 
                         il.Emit(OpCodes.Ldarg_1);
                         il.Emit(OpCodes.Ldstr, propertyInfo.Name);
-                        il.Emit(OpCodes.Ldloc_0);
+                        il.Emit(OpCodes.Ldarg_2);
                         il.Emit(OpCodes.Ldfld, backingField);
                     }
                     else
                     {
                         il.Emit(OpCodes.Ldarg_1);
                         il.Emit(OpCodes.Ldstr, propertyInfo.Name);
-                        il.Emit(OpCodes.Ldloc_0);
+                        il.Emit(OpCodes.Ldarg_2);
                         il.Emit(OpCodes.Call, propertyInfo.GetGetMethod());
                     }
 
@@ -66,7 +61,6 @@ namespace DbMap.Serialization
                         var completeLabel = il.DefineLabel();
 
                         var index = locals.GetLocalIndex(propertyInfo.PropertyType, "nullable") ?? locals.DeclareLocal(propertyInfo.PropertyType, "nullable");
-
                         il.Emit(OpCodes.Stloc, index);
                         il.Emit(OpCodes.Ldloca_S, index);
 
@@ -75,8 +69,7 @@ namespace DbMap.Serialization
 
                         // Value == null
                         {
-                            il.Emit(OpCodes.Ldnull);
-                            il.Emit(OpCodes.Ldfld, DbNull);
+                            il.Emit(OpCodes.Ldsfld, DbNull);
                             il.Emit(OpCodes.Br_S, completeLabel);
                         }
 
@@ -92,22 +85,18 @@ namespace DbMap.Serialization
                     }
                     else if (propertyInfo.PropertyType.IsClass)
                     {
-                        var isNotNullLabel = il.DefineLabel();
+                        var completeLabel = il.DefineLabel();
 
                         il.Emit(OpCodes.Dup);
-                        il.Emit(OpCodes.Brtrue_S, isNotNullLabel);
+                        il.Emit(OpCodes.Brtrue_S, completeLabel);
 
                         // Value == null
                         {
                             il.Emit(OpCodes.Pop);
-                            il.Emit(OpCodes.Ldnull);
-                            il.Emit(OpCodes.Ldfld, DbNull);
+                            il.Emit(OpCodes.Ldsfld, DbNull);
                         }
 
-                        // Value != null
-                        {
-                            il.MarkLabel(isNotNullLabel);
-                        }
+                        il.MarkLabel(completeLabel);
                     }
                     else
                     {
