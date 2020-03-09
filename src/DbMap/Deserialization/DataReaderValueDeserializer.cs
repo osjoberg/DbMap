@@ -38,7 +38,7 @@ namespace DbMap.Deserialization
             this.propertyInfo = propertyInfo;
         }
 
-        public void EmitDeserializeProperty(ILGenerator il, LocalsMap locals, bool isNullInitialized)
+        public void EmitDeserializeProperty(ILGenerator il, bool isNullInitialized)
         {
             if (isNullInitialized)
             {
@@ -47,15 +47,15 @@ namespace DbMap.Deserialization
             }
 
             EmitLoadUserType(il);
-            EmitDeserializeClrType(il, locals);
+            EmitDeserializeClrType(il);
             EmitAssignProperty(il);
         }
 
-        public void EmitDeserializeClrType(ILGenerator il, LocalsMap locals)
+        public void EmitDeserializeClrType(ILGenerator il)
         {
             if (nullableInfo != null || type.IsClass)
             {
-                EmitGetValueOrNull(il, locals);
+                EmitGetValueOrNull(il);
             }
             else
             {
@@ -91,11 +91,11 @@ namespace DbMap.Deserialization
             il.MarkLabel(completeLabel);
         }
 
-        private void EmitGetValueOrNull(ILGenerator il, LocalsMap locals)
+        private void EmitGetValueOrNull(ILGenerator il)
         {
              var completeLabel = il.DefineLabel();
 
-             EmitNull(il, locals);
+             EmitNull(il);
              il.Invoke(DbDataReaderMetadata.IsDBNull, ordinal);
              il.Emit(OpCodes.Brtrue_S, completeLabel);
 
@@ -109,12 +109,11 @@ namespace DbMap.Deserialization
              il.MarkLabel(completeLabel);
         }
 
-        private void EmitNull(ILGenerator il, LocalsMap locals)
+        private void EmitNull(ILGenerator il)
         {
             if (nullableInfo != null)
             {
-                var localIndex = locals.GetLocalIndex(type, "nullable") ?? locals.DeclareLocal(type, "nullable");
-                il.Emit(OpCodes.Ldloc_S, localIndex);
+                il.Emit(OpCodes.Ldsfld, nullableInfo.NullConstant);
             }
             else
             {

@@ -84,8 +84,7 @@ namespace DbMap.Deserialization
                 deserializeMethod.SetParameters(DbDataReaderMetadata.TypeArray);
 
                 var il = deserializeMethod.GetILGenerator();
-                var locals = new LocalsMap(il);
-                EmitDeserializeType(il, locals, type, columnNames);
+                EmitDeserializeType(il, type, columnNames);
                 il.Emit(OpCodes.Ret);
             }
 
@@ -154,24 +153,24 @@ namespace DbMap.Deserialization
             return (DataReaderDeserializer)Activator.CreateInstance(typeBuilder.CreateTypeInfo());
         }
 
-        private static void EmitDeserializeType(ILGenerator il, LocalsMap locals, Type type, string[] columnNames)
+        private static void EmitDeserializeType(ILGenerator il, Type type, string[] columnNames)
         {
             if (columnNames == null)
             {
-                EmitDeserializeClrType(il, locals, type);
+                EmitDeserializeClrType(il, type);
             }
             else
             {
-                EmitDeserializeUserType(il, locals, type, columnNames);
+                EmitDeserializeUserType(il, type, columnNames);
             }
         }
 
-        private static void EmitDeserializeClrType(ILGenerator il, LocalsMap locals, Type type)
+        private static void EmitDeserializeClrType(ILGenerator il, Type type)
         {
-            new DataReaderValueDeserializer(type, 0).EmitDeserializeClrType(il, locals);
+            new DataReaderValueDeserializer(type, 0).EmitDeserializeClrType(il);
         }
 
-        private static void EmitDeserializeUserType(ILGenerator il, LocalsMap locals, Type type, string[] columnNames)
+        private static void EmitDeserializeUserType(ILGenerator il, Type type, string[] columnNames)
         {
             var constructor = type.GetConstructor(Type.EmptyTypes);
             if (constructor == null)
@@ -195,7 +194,7 @@ namespace DbMap.Deserialization
                 {
                     var propertyIsNullInitialized = propertyInfo.CanRead && propertyInfo.GetValue(sample) == null;
                     var dataReaderPropertyValueDeserializer = new DataReaderValueDeserializer(propertyInfo, ordinal);
-                    dataReaderPropertyValueDeserializer.EmitDeserializeProperty(il, locals, propertyIsNullInitialized);
+                    dataReaderPropertyValueDeserializer.EmitDeserializeProperty(il, propertyIsNullInitialized);
                     continue;
                 }
                 
@@ -204,7 +203,7 @@ namespace DbMap.Deserialization
                 {
                     var fieldIsNullInitialized = fieldInfo.GetValue(sample) == null;
                     var dataReaderFieldValueDeserializer = new DataReaderValueDeserializer(fieldInfo, ordinal);
-                    dataReaderFieldValueDeserializer.EmitDeserializeProperty(il, locals, fieldIsNullInitialized);
+                    dataReaderFieldValueDeserializer.EmitDeserializeProperty(il, fieldIsNullInitialized);
                 }
             }
         }
