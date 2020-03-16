@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using BenchmarkDotNet.Attributes;
 
@@ -16,62 +18,79 @@ namespace DbMap.Benchmark.Benchmarks
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class SmallBenchmark
     {
-        private static readonly string SmallSql = $"SELECT {string.Join(", ", Small.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Small";
-        private static readonly object SmallParameters = new { p1 = 1 };
-        private static readonly object[] SmallParametersArray = { 1 };
-        private static readonly DbQuery SmallQuery = new DbQuery(SmallSql);
+        private static readonly int p1 = 1;
 
-        private SqlConnection sqlConnection;
-        private DbMapDbContext dbMapDbContext;
+        private static readonly string Sql = $"SELECT {string.Join(", ", Small.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Small WHERE @p1 <> 1";
+        private static readonly string SqlEFRaw = Regex.Replace(Sql, "@p([0-9]+)", match => "{" + (int.Parse(match.Groups[1].Value) - 1) + "}");
+        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Int32], [String], [NullableBoolean], [NullableInt32], [NullableString] FROM Small WHERE {p1} <> 1";
+
+        private static readonly object Parameters = new { p1 };
+        private static readonly object[] ParametersArray = { p1 };
+        private static readonly DbQuery Query = new DbQuery(Sql);
+
+        private SqlConnection connection;
+        private DbMapDbContext context;
 
         [GlobalSetup]
         public void GlobalSetup()
         {
             SqlServerBootstrap.Initialize();
+
+            var indexOfFirstParameter = Sql.IndexOf("@", StringComparison.Ordinal);
+            if (Sql.Substring(0, indexOfFirstParameter) != SqlEFInterpolated.ToString().Substring(0, indexOfFirstParameter))
+            {
+                throw new Exception();
+            }
         }
 
         [IterationSetup]
         public void IterationSetup()
         {
-            sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString);
-            dbMapDbContext = new DbMapDbContext();
+            connection = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString);
+            context = new DbMapDbContext();
         }
 
         [IterationCleanup]
         public void IterationCleanup()
         {
-            sqlConnection.Dispose();
-            dbMapDbContext.Dispose();
+            connection.Dispose();
+            context.Dispose();
         }
 
         [Benchmark]
-        public List<Small> EFCoreSmallLinq()
+        public List<Small> EFCoreLinqSmall()
         {
-            return dbMapDbContext.Small.AsList();
+            return context.Small.Where(small => p1 != 1).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public List<Small> EFCoreSmall()
+        public List<Small> EFCoreRawSmall()
         {
-            return dbMapDbContext.Small.FromSqlRaw(SmallSql, SmallParametersArray).AsList();
+            return context.Small.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
+        }
+
+        [Benchmark]
+        public List<Small> EFCoreInterpolatedSmall()
+        {
+            return context.Small.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
         }
 
         [Benchmark]
         public List<Small> DapperSmall()
         {
-            return sqlConnection.Query<Small>(SmallSql, SmallParameters).AsList();
+            return connection.Query<Small>(Sql, Parameters).AsList();
         }
 
         [Benchmark]
         public List<Small> RepoDbSmall()
         {
-            return sqlConnection.ExecuteQuery<Small>(SmallSql, SmallParameters).AsList();
+            return connection.ExecuteQuery<Small>(Sql, Parameters).AsList();
         }
 
         [Benchmark(Baseline = true)]
         public List<Small> DbMapSmall()
         {
-            return SmallQuery.Query<Small>(sqlConnection, SmallParameters).AsList();
+            return Query.Query<Small>(connection, Parameters).AsList();
         }
     }
 }

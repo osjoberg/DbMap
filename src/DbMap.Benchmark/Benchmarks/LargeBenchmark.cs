@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using BenchmarkDotNet.Attributes;
 
@@ -16,62 +18,87 @@ namespace DbMap.Benchmark.Benchmarks
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 100)]
     public class LargeBenchmark
     {
-        private static readonly string LargeSql = $"SELECT {string.Join(", ", Large.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Large";
-        private static readonly object LargeParameters = new { p1 = 1, p2 = 2, p3 = 3, p4 = 4, p5 = 5, p6 = 6, p7 = 7, p8 = 8, p9 = 9, p10 = 10 };
-        private static readonly object[] LargeParametersArray = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
-        private static readonly DbQuery LargeQuery = new DbQuery(LargeSql);
+        private static readonly int p1 = 1;
+        private static readonly int p2 = 2;
+        private static readonly int p3 = 3;
+        private static readonly int p4 = 4;
+        private static readonly int p5 = 5;
+        private static readonly int p6 = 6;
+        private static readonly int p7 = 7;
+        private static readonly int p8 = 8;
+        private static readonly int p9 = 9;
+        private static readonly int p10 = 10;
 
-        private SqlConnection sqlConnection;
-        private DbMapDbContext dbMapDbContext;
+        private static readonly string Sql = $"SELECT {string.Join(", ", Large.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Large WHERE @p1 <> @p2 OR @p3 <> @p4 OR @p5 <> @p6 OR @p7 <> @p8 OR @p9 <> @p10";
+        private static readonly string SqlEFRaw = Regex.Replace(Sql, "@p([0-9]+)", match => "{" + (int.Parse(match.Groups[1].Value) - 1) + "}");
+        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Byte], [DateTime], [Decimal], [Double], [Guid], [Int16], [Int32], [Int64], [Single], [String], [NullableBoolean], [NullableByte], [NullableDateTime], [NullableDecimal], [NullableDouble], [NullableGuid], [NullableInt16], [NullableInt32], [NullableInt64], [NullableSingle], [NullableString] FROM Large WHERE {p1} <> {p2} OR {p3} <> {p4} OR {p5} <> {p6} OR {p7} <> {p8} OR {p9} <> {p10}";
+        private static readonly object Parameters = new { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 };
+        private static readonly object[] ParametersArray = { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 };
+        private static readonly DbQuery Query = new DbQuery(Sql);
+
+        private SqlConnection connection;
+        private DbMapDbContext context;
 
         [GlobalSetup]
         public void GlobalSetup()
         {
             SqlServerBootstrap.Initialize();
+            
+            var indexOfFirstParameter = Sql.IndexOf("@", StringComparison.Ordinal);
+            if (Sql.Substring(0, indexOfFirstParameter) != SqlEFInterpolated.ToString().Substring(0, indexOfFirstParameter))
+            {
+                throw new Exception();
+            }
         }
 
         [IterationSetup]
         public void IterationSetup()
         {
-            sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString);
-            dbMapDbContext = new DbMapDbContext();
+            connection = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString);
+            context = new DbMapDbContext();
         }
 
         [IterationCleanup]
         public void IterationCleanup()
         {
-            sqlConnection.Dispose();
-            dbMapDbContext.Dispose();
+            connection.Dispose();
+            context.Dispose();
         }
 
         [Benchmark]
-        public List<Large> EFCoreLargeLinq()
+        public List<Large> EFCoreLinqLarge()
         {
-            return dbMapDbContext.Large.AsList();
+            return context.Large.Where(large => p1 != p2 || p3 != p4 || p5 != p6 || p7 != p8 || p9 != p10).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public List<Large> EFCoreLarge()
+        public List<Large> EFCoreRawLarge()
         {
-            return dbMapDbContext.Large.FromSqlRaw(LargeSql, LargeParametersArray).AsList();
+            return context.Large.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
+        }
+
+        [Benchmark]
+        public List<Large> EFCoreInterpolatedLarge()
+        {
+            return context.Large.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
         }
 
         [Benchmark]
         public List<Large> DapperLarge()
         {
-            return sqlConnection.Query<Large>(LargeSql, LargeParameters).AsList();
+            return connection.Query<Large>(Sql, Parameters).AsList();
         }
 
         [Benchmark]
         public List<Large> RepoDbLarge()
         {
-            return sqlConnection.ExecuteQuery<Large>(LargeSql, LargeParameters).AsList();
+            return connection.ExecuteQuery<Large>(Sql, Parameters).AsList();
         }
 
         [Benchmark(Baseline = true)]
         public List<Large> DbMapLarge()
         {
-            return LargeQuery.Query<Large>(sqlConnection, LargeParameters).AsList();
+            return Query.Query<Large>(connection, Parameters).AsList();
         }
     }
 }

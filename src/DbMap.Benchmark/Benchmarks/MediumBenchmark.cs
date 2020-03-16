@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 using BenchmarkDotNet.Attributes;
 
@@ -16,62 +18,84 @@ namespace DbMap.Benchmark.Benchmarks
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class MediumBenchmark
     {
-        private static readonly string MediumSql = $"SELECT {string.Join(", ", Medium.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Medium";
-        private static readonly object MediumParameters = new { p1 = 1, p2 = 2, p3 = 3, p4 = 4, p5 = 5 };
-        private static readonly object[] MediumParametersArray = { 1, 2, 3, 4, 5 };
-        private static readonly DbQuery MediumQuery = new DbQuery(MediumSql);
+        private static readonly int p1 = 1;
+        private static readonly int p2 = 2;
+        private static readonly int p3 = 3;
+        private static readonly int p4 = 4;
+        private static readonly int p5 = 5;
 
-        private SqlConnection sqlConnection;
-        private DbMapDbContext dbMapDbContext;
+        private static readonly string Sql = $"SELECT {string.Join(", ", Medium.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Medium WHERE @p1 <> @p2 OR @p3 <> @p4 OR @p5 <> 0";
+        private static readonly string SqlEFRaw = Regex.Replace(Sql, "@p([0-9]+)", match => "{" + (int.Parse(match.Groups[1].Value) - 1) + "}");
+        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Decimal], [Double], [Int32], [String], [NullableBoolean], [NullableDecimal], [NullableDouble], [NullableInt32], [NullableString] FROM Medium WHERE {p1} <> {p2} OR {p3} <> {p4} OR {p5} <> 0";
+
+        private static readonly object Parameters = new { p1, p2, p3, p4, p5 };
+        private static readonly object[] ParametersArray = { p1, p2, p3, p4, p5 };
+        private static readonly DbQuery Query = new DbQuery(Sql);
+
+        private SqlConnection connection;
+        private DbMapDbContext context;
 
         [GlobalSetup]
         public void GlobalSetup()
         {
             SqlServerBootstrap.Initialize();
+
+            var indexOfFirstParameter = Sql.IndexOf("@", StringComparison.Ordinal);
+            if (Sql.Substring(0, indexOfFirstParameter) != SqlEFInterpolated.ToString().Substring(0, indexOfFirstParameter))
+            {
+                throw new Exception();
+            }
+
         }
 
         [IterationSetup]
         public void IterationSetup()
         {
-            sqlConnection = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString);
-            dbMapDbContext = new DbMapDbContext();
+            connection = new SqlConnection(ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString);
+            context = new DbMapDbContext();
         }
 
         [IterationCleanup]
         public void IterationCleanup()
         {
-            sqlConnection.Dispose();
-            dbMapDbContext.Dispose();
+            connection.Dispose();
+            context.Dispose();
         }
 
         [Benchmark]
-        public List<Medium> EFCoreMediumLinq()
+        public List<Medium> EFCoreLinqMedium()
         {
-            return dbMapDbContext.Medium.AsList();
+            return context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public List<Medium> EFCoreMedium()
+        public List<Medium> EFCoreRawMedium()
         {
-            return dbMapDbContext.Medium.FromSqlRaw(MediumSql, MediumParametersArray).AsList();
+            return context.Medium.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
+        }
+
+        [Benchmark]
+        public List<Medium> EFCoreInterpolatedMedium()
+        {
+            return context.Medium.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
         }
 
         [Benchmark]
         public List<Medium> DapperMedium()
         {
-            return sqlConnection.Query<Medium>(MediumSql, MediumParameters).AsList();
+            return connection.Query<Medium>(Sql, Parameters).AsList();
         }
 
         [Benchmark]
         public List<Medium> RepoDbMedium()
         {
-            return sqlConnection.ExecuteQuery<Medium>(MediumSql, MediumParameters).AsList();
+            return connection.ExecuteQuery<Medium>(Sql, Parameters).AsList();
         }
 
         [Benchmark(Baseline = true)]
         public List<Medium> DbMapMedium()
         {
-            return MediumQuery.Query<Medium>(sqlConnection, MediumParameters).AsList();
+            return Query.Query<Medium>(connection, Parameters).AsList();
         }
     }
 }
