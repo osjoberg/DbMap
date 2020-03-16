@@ -1,4 +1,6 @@
-﻿using DbMap.Benchmark;
+﻿using System.Linq;
+
+using DbMap.Benchmark;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -10,7 +12,9 @@ namespace DbMap.Test.Deserialization
         [TestMethod]
         public void CanDeserializeUserType()
         {
-            DbAssert.AreEqual(Large.Create(0), "SELECT TOP 1 * FROM Large", false);
+            var expected = Enumerable.Range(0, 10000).Select(Large.Create).ToList();
+
+            DbAssert.CollectionAreEqual(expected, "SELECT * FROM Large");
         }
     }
 }

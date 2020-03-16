@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Common;
 using System.Linq;
@@ -59,7 +60,7 @@ namespace DbMap.Test
             Assert.AreEqual(expected, actualUserType);
         }
 
-        public static void CollectionAreEqual<TReturn>(TReturn expected, string sql) where TReturn : ICollection
+        public static void ArrayAreEqual<TReturn>(TReturn expected, string sql) where TReturn : ICollection
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
 
@@ -74,6 +75,18 @@ namespace DbMap.Test
 
             var actualUserType = new DbQuery(sql + " AS Value").QuerySingle<UserType<TReturn>>(sqlConnection).Value;
             CollectionAssert.AreEqual(expected, actualUserType);
+        }
+
+        public static void CollectionAreEqual<TReturn>(IEnumerable<TReturn> expected, string sql)
+        {
+            using var sqlConnection = new SqlConnection(ConnectionString);
+
+            var actualQuery = new DbQuery(sql).Query<TReturn>(sqlConnection);
+
+            var expectedArray = expected.ToArray();
+            var actualArray = actualQuery.ToArray();
+
+            CollectionAssert.AreEqual(expectedArray, actualArray);
         }
 
         public static void IsTrue(string sql, object parameters)

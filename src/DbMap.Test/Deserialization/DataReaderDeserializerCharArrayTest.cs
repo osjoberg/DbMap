@@ -10,28 +10,28 @@ namespace DbMap.Test.Deserialization
         [TestMethod]
         public void CanDeserializeNullCharArray()
         {
-            DbAssert.CollectionAreEqual<char[]>(null, "SELECT CAST(NULL AS VARCHAR)");
+            DbAssert.ArrayAreEqual<char[]>(null, "SELECT CAST(NULL AS VARCHAR)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(EntryPointNotFoundException))]
         public void CanDeserializeEmptyCharArray()
         {
-            DbAssert.CollectionAreEqual(new char[0], "SELECT CAST('' AS VARCHAR)");
+            DbAssert.ArrayAreEqual(new char[0], "SELECT CAST('' AS VARCHAR)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(EntryPointNotFoundException))]
         public void CanDeserializeOneElementCharArray()
         {
-            DbAssert.CollectionAreEqual(new[] { 'A' }, "SELECT CAST('A' AS VARCHAR)");
+            DbAssert.ArrayAreEqual(new[] { 'A' }, "SELECT CAST('A' AS VARCHAR)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(EntryPointNotFoundException))]
         public void CanDeserializeTwoElementCharArray()
         {
-            DbAssert.CollectionAreEqual(new[] { 'A', 'B' }, "SELECT CAST('AB' AS VARCHAR)");
+            DbAssert.ArrayAreEqual(new[] { 'A', 'B' }, "SELECT CAST('AB' AS VARCHAR)");
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace DbMap.Test.Deserialization
+﻿using System;
+
+namespace DbMap.Test.Deserialization
 {
     public struct PublicStruct
     {
@@ -11,8 +13,7 @@
 
         public override int GetHashCode()
         {
-            return Value.GetHashCode();
+            throw new NotImplementedException();
         }
-
     }
 }
