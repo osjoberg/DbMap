@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace DbMap.Benchmark
@@ -13,6 +14,7 @@ namespace DbMap.Benchmark
 
         public int Int32 { get; set; }
 
+        [Required]
         public string String { get; set; }
 
         public bool? NullableBoolean { get; set; }

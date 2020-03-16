@@ -167,7 +167,29 @@ namespace DbMap.Deserialization
 
         private static void EmitDeserializeClrType(ILGenerator il, Type type)
         {
-            new DataReaderValueDeserializer(type, 0).EmitDeserializeClrType(il);
+            new DataReaderValueDeserializer(type, 0).EmitDeserializeClrType(il, false);
+        }
+
+        private static bool PropertyHasRequiredAttribute(PropertyInfo propertyInfo)
+        {
+            if (propertyInfo.PropertyType.IsClass == false)
+            {
+                return false;
+            }
+
+            using (var customAttributes = propertyInfo.GetCustomAttributes().GetEnumerator())
+            {
+                while (customAttributes.MoveNext())
+                {
+                    var type = customAttributes.Current.GetType();
+                    if (type.Namespace == "System.ComponentModel.DataAnnotations" && type.Name == "RequiredAttribute")
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static void EmitDeserializeUserType(ILGenerator il, Type type, string[] columnNames)
@@ -193,17 +215,19 @@ namespace DbMap.Deserialization
                 if (propertyInfo.CanWrite && propertyInfo.GetSetMethod() != null)
                 {
                     var propertyIsNullInitialized = propertyInfo.CanRead && propertyInfo.GetValue(sample) == null;
+                    var hasRequiredAttribute = PropertyHasRequiredAttribute(propertyInfo);
                     var dataReaderPropertyValueDeserializer = new DataReaderValueDeserializer(propertyInfo, ordinal);
-                    dataReaderPropertyValueDeserializer.EmitDeserializeProperty(il, propertyIsNullInitialized);
+                    dataReaderPropertyValueDeserializer.EmitDeserializeProperty(il, propertyIsNullInitialized, hasRequiredAttribute);
                     continue;
                 }
-                
+
                 var fieldInfo = type.GetField("<" + propertyInfo.Name + ">k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
                 if (fieldInfo != null)
                 {
                     var fieldIsNullInitialized = fieldInfo.GetValue(sample) == null;
+                    var hasRequiredAttribute = PropertyHasRequiredAttribute(propertyInfo);
                     var dataReaderFieldValueDeserializer = new DataReaderValueDeserializer(fieldInfo, ordinal);
-                    dataReaderFieldValueDeserializer.EmitDeserializeProperty(il, fieldIsNullInitialized);
+                    dataReaderFieldValueDeserializer.EmitDeserializeProperty(il, fieldIsNullInitialized, hasRequiredAttribute);
                 }
             }
         }

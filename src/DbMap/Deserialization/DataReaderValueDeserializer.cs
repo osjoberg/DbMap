@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Reflection.Emit;
+
 using DbMap.Infrastructure;
 
 namespace DbMap.Deserialization
@@ -38,39 +39,29 @@ namespace DbMap.Deserialization
             this.propertyInfo = propertyInfo;
         }
 
-        public void EmitDeserializeProperty(ILGenerator il, bool isNullInitialized)
+        public void EmitDeserializeProperty(ILGenerator il, bool isNullInitialized, bool hasRequiredAttribute)
         {
-            if (isNullInitialized)
+            if (isNullInitialized && hasRequiredAttribute == false)
             {
                 EmitDeserializeNonNullValue(il);
                 return;
             }
 
             EmitLoadUserType(il);
-            EmitDeserializeClrType(il);
+            EmitDeserializeClrType(il, hasRequiredAttribute);
             EmitAssignProperty(il);
         }
 
-        public void EmitDeserializeClrType(ILGenerator il)
+        public void EmitDeserializeClrType(ILGenerator il, bool hasRequiredAttribute)
         {
-            if (nullableInfo != null || type.IsClass)
-            {
-                EmitGetValueOrNull(il);
-            }
-            else
+            if (hasRequiredAttribute || (nullableInfo == null && type.IsClass == false))
             {
                 EmitGetValue(il);
             }
-        }
-
-        private static void EmitLoadUserType(ILGenerator il)
-        {
-            il.Emit(OpCodes.Dup);
-        }
-
-        private void EmitGetValue(ILGenerator il)
-        {
-            il.Invoke(getValueMethod, ordinal);
+            else
+            {
+                EmitGetValueOrNull(il);
+            }
         }
 
         private void EmitDeserializeNonNullValue(ILGenerator il)
@@ -82,13 +73,18 @@ namespace DbMap.Deserialization
 
             // Not null
             {
-                il.Emit(OpCodes.Dup);
-                il.Invoke(getValueMethod, ordinal);
+                EmitLoadUserType(il);
+                EmitGetValue(il);
                 EmitWrapNullable(il);
                 EmitAssignProperty(il);
             }
 
             il.MarkLabel(completeLabel);
+        }
+
+        private void EmitLoadUserType(ILGenerator il)
+        {
+            il.Emit(OpCodes.Dup);
         }
 
         private void EmitGetValueOrNull(ILGenerator il)
@@ -107,6 +103,11 @@ namespace DbMap.Deserialization
              }
 
              il.MarkLabel(completeLabel);
+        }
+
+        private void EmitGetValue(ILGenerator il)
+        {
+            il.Invoke(getValueMethod, ordinal);
         }
 
         private void EmitNull(ILGenerator il)
