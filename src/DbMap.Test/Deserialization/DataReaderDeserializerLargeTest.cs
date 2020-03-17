@@ -12,7 +12,7 @@ namespace DbMap.Test.Deserialization
         [TestMethod]
         public void CanDeserializeUserType()
         {
-            var expected = Enumerable.Range(0, 10000).Select(Large.Create).ToList();
+            var expected = Enumerable.Range(0, 1000).Select(Large.Create).ToList();
 
             DbAssert.CollectionAreEqual(expected, "SELECT * FROM Large");
         }
