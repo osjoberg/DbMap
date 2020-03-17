@@ -107,13 +107,11 @@ namespace DbMap
                 ThrowException.ValueCannotBeNull(nameof(connection));
             }
 
-            using (var command = SetupCommand(connection, parameters, transaction))
-            {
-                var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess);
-                SetupDataReaderDeserializer(typeof(TReturn), reader);
+            var command = (DbCommand)SetupCommand(connection, parameters, transaction);
+            var reader = command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess);
+            SetupDataReaderDeserializer(typeof(TReturn), reader);
 
-                return dataReaderDeserializer.DeserializeAll<TReturn>(reader);
-            }
+            return dataReaderDeserializer.DeserializeAll<TReturn>(command, reader);
         }
 
         /// <summary>
@@ -132,7 +130,7 @@ namespace DbMap
             }
 
             using (var command = SetupCommand(connection, parameters, transaction))
-            using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SingleRow | CommandBehavior.SequentialAccess))
+            using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess | CommandBehavior.SingleRow))
             {
                 SetupDataReaderDeserializer(typeof(TReturn), reader);
                 return DbQueryInternal.QueryFirst<TReturn>(reader, dataReaderDeserializer);
@@ -155,7 +153,7 @@ namespace DbMap
             }
 
             using (var command = SetupCommand(connection, parameters, transaction))
-            using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SingleRow | CommandBehavior.SequentialAccess))
+            using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess | CommandBehavior.SingleRow))
             {
                 SetupDataReaderDeserializer(typeof(TReturn), reader);
                 return DbQueryInternal.QueryFirstOrDefault<TReturn>(reader, dataReaderDeserializer);

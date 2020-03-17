@@ -11,9 +11,11 @@ namespace DbMap.Deserialization
 {
     public abstract class DataReaderDeserializer
     {
+        private static readonly Type[] DeserializeAllParameters = { DbCommandMetadata.Type, DbDataReaderMetadata.Type };
+
         public abstract TReturn Deserialize<TReturn>(DbDataReader reader);
 
-        public abstract IEnumerable<TReturn> DeserializeAll<TReturn>(DbDataReader reader);
+        public abstract IEnumerable<TReturn> DeserializeAll<TReturn>(DbCommand command, DbDataReader reader);
 
         internal static DataReaderDeserializer Create(Type type, string[] columnNames)
         {
@@ -28,20 +30,28 @@ namespace DbMap.Deserialization
 
             // Fields
             var readerField = typeBuilder.DefineField("reader", DbDataReaderMetadata.Type, FieldAttributes.Private);
+            var commandField = typeBuilder.DefineField("command", typeof(DbCommand), FieldAttributes.Private);
 
             // ctor()
             {
                 var constructor = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, Type.EmptyTypes);
                 var il = constructor.GetILGenerator();
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Call, typeof(object).GetConstructor(Type.EmptyTypes));
                 il.Emit(OpCodes.Ret);
             }
 
-            // .ctor(IDataReader)
-            var dataReaderDeserializerConstructor = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, DbDataReaderMetadata.TypeArray);
+            // .ctor(DbCommand, DbDataReader)
+            var dataReaderDeserializerConstructor = typeBuilder.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, DeserializeAllParameters);
             {
                 var il = dataReaderDeserializerConstructor.GetILGenerator();
                 il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Call, typeof(object).GetConstructor(Type.EmptyTypes));
+                il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Stfld, commandField);
+                il.Emit(OpCodes.Ldarg_0);
+                il.Emit(OpCodes.Ldarg_2);
                 il.Emit(OpCodes.Stfld, readerField);
                 il.Emit(OpCodes.Ret);
             }
@@ -61,6 +71,9 @@ namespace DbMap.Deserialization
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Ldfld, readerField);
                 il.Emit(OpCodes.Callvirt, DbDataReaderMetadata.Dispose);
+                il.Emit(OpCodes.Ldarg_0);
+                 il.Emit(OpCodes.Ldfld, commandField);
+                il.Emit(OpCodes.Callvirt, DbCommandMetadata.Dispose);
                 il.Emit(OpCodes.Ret);
             }
 
@@ -88,16 +101,17 @@ namespace DbMap.Deserialization
                 il.Emit(OpCodes.Ret);
             }
 
-            // IEnumerable<TReturn> DeserializeAll<TReturn>(DBDataReader)
+            // IEnumerable<TReturn> DeserializeAll<TReturn>(DbCommand, DbDataReader)
             {
                 var deserializeAllMethod = typeBuilder.DefineMethod(nameof(DeserializeAll), MethodAttributes.Public | MethodAttributes.Virtual);
                 var returnTypeParameter = deserializeAllMethod.DefineGenericParameters("TReturn")[0];
 
                 deserializeAllMethod.SetReturnType(typeof(IEnumerable<>).MakeGenericType(returnTypeParameter));
-                deserializeAllMethod.SetParameters(DbDataReaderMetadata.TypeArray);
+                deserializeAllMethod.SetParameters(DeserializeAllParameters);
 
                 var il = deserializeAllMethod.GetILGenerator();
                 il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Ldarg_2);
                 il.Emit(OpCodes.Newobj, dataReaderDeserializerConstructor);
                 il.Emit(OpCodes.Ret);
             }
