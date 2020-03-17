@@ -72,7 +72,7 @@ namespace DbMap.Deserialization
                 il.Emit(OpCodes.Ldfld, readerField);
                 il.Emit(OpCodes.Callvirt, DbDataReaderMetadata.Dispose);
                 il.Emit(OpCodes.Ldarg_0);
-                 il.Emit(OpCodes.Ldfld, commandField);
+                il.Emit(OpCodes.Ldfld, commandField);
                 il.Emit(OpCodes.Callvirt, DbCommandMetadata.Dispose);
                 il.Emit(OpCodes.Ret);
             }
@@ -220,7 +220,7 @@ namespace DbMap.Deserialization
 
             for (var ordinal = 0; ordinal < columnNames.Length; ordinal++)
             {
-                var propertyInfo = type.GetProperty(columnNames[ordinal]);
+                var propertyInfo = type.GetProperty(columnNames[ordinal], BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
                 if (propertyInfo == null)
                 {
                     continue;

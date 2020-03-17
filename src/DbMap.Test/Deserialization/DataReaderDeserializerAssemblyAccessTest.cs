@@ -16,6 +16,18 @@ namespace DbMap.Test.Deserialization
         }
 
         [TestMethod]
+        public void CanDeserializePublicClassPublicSetter()
+        {
+            DbAssert.AreEqual(new AssemblyPublicClass(publicSetter: true), "SELECT CAST(1 AS BIT) AS PublicSetter", false);
+        }
+
+        [TestMethod]
+        public void CanDeserializePublicClassPublicSetterCaseInsensitive()
+        {
+            DbAssert.AreEqual(new AssemblyPublicClass(publicSetter: true), "SELECT CAST(1 AS BIT) AS pUbLiCsEtTeR", false);
+        }
+
+        [TestMethod]
         public void CanDeserializePublicClassPrivateSetter()
         {
             DbAssert.AreEqual(new AssemblyPublicClass(privateSetter: true), "SELECT CAST(1 AS BIT) AS PrivateSetter", false);
