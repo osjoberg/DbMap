@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.3.1</Version>
+    <Version>0.3.2</Version>
     <Authors>Oskar Sjöberg</Authors>
     <Company>-</Company>
     <Description>Performance-oriented database-to-object mapper for .NET</Description>
