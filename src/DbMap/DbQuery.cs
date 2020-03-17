@@ -58,7 +58,7 @@ namespace DbMap
                 ThrowException.ValueCannotBeNull(nameof(connection));
             }
 
-            using (var command = SetupCommand(connection, transaction, parameters))
+            using (var command = SetupCommand(connection, parameters, transaction))
             {
                 return command.ExecuteNonQuery();
             }
@@ -79,7 +79,7 @@ namespace DbMap
                 ThrowException.ValueCannotBeNull(nameof(connection));
             }
 
-            using (var command = SetupCommand(connection, transaction, parameters))
+            using (var command = SetupCommand(connection, parameters, transaction))
             {
                 if (ReferenceEquals(typeof(TReturn), returnType) == false)
                 {
@@ -107,7 +107,7 @@ namespace DbMap
                 ThrowException.ValueCannotBeNull(nameof(connection));
             }
 
-            using (var command = SetupCommand(connection, transaction, parameters))
+            using (var command = SetupCommand(connection, parameters, transaction))
             {
                 var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess);
                 SetupDataReaderDeserializer(typeof(TReturn), reader);
@@ -131,7 +131,7 @@ namespace DbMap
                 ThrowException.ValueCannotBeNull(nameof(connection));
             }
 
-            using (var command = SetupCommand(connection, transaction, parameters))
+            using (var command = SetupCommand(connection, parameters, transaction))
             using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SingleRow | CommandBehavior.SequentialAccess))
             {
                 SetupDataReaderDeserializer(typeof(TReturn), reader);
@@ -154,7 +154,7 @@ namespace DbMap
                 ThrowException.ValueCannotBeNull(nameof(connection));
             }
 
-            using (var command = SetupCommand(connection, transaction, parameters))
+            using (var command = SetupCommand(connection, parameters, transaction))
             using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SingleRow | CommandBehavior.SequentialAccess))
             {
                 SetupDataReaderDeserializer(typeof(TReturn), reader);
@@ -177,7 +177,7 @@ namespace DbMap
                 ThrowException.ValueCannotBeNull(nameof(connection));
             }
 
-            using (var command = SetupCommand(connection, transaction, parameters))
+            using (var command = SetupCommand(connection, parameters, transaction))
             using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess))
             {
                 SetupDataReaderDeserializer(typeof(TReturn), reader);
@@ -200,7 +200,7 @@ namespace DbMap
                 ThrowException.ValueCannotBeNull(nameof(connection));
             }
 
-            using (var command = SetupCommand(connection, transaction, parameters))
+            using (var command = SetupCommand(connection, parameters, transaction))
             using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess))
             {
                 SetupDataReaderDeserializer(typeof(TReturn), reader);
@@ -220,7 +220,7 @@ namespace DbMap
             dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(type, columnNames);
         }
 
-        private IDbCommand SetupCommand(IDbConnection connection, IDbTransaction transaction, object parameters)
+        private IDbCommand SetupCommand(IDbConnection connection, object parameters, IDbTransaction transaction)
         {
             if (connection.State == ConnectionState.Closed)
             {
