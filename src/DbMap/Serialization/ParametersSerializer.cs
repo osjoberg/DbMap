@@ -42,14 +42,14 @@ namespace DbMap.Serialization
                         }
 
                         il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Ldstr, propertyInfo.Name);
+                        il.Emit(OpCodes.Ldstr, '@' + propertyInfo.Name);
                         il.Emit(OpCodes.Ldarg_2);
                         il.Emit(OpCodes.Ldfld, backingField);
                     }
                     else
                     {
                         il.Emit(OpCodes.Ldarg_1);
-                        il.Emit(OpCodes.Ldstr, propertyInfo.Name);
+                        il.Emit(OpCodes.Ldstr, '@' + propertyInfo.Name);
                         il.Emit(OpCodes.Ldarg_2);
                         il.Emit(OpCodes.Call, propertyInfo.GetGetMethod());
                     }
