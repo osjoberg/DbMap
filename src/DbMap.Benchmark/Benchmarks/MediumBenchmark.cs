@@ -45,7 +45,6 @@ namespace DbMap.Benchmark.Benchmarks
             {
                 throw new Exception();
             }
-
         }
 
         [IterationSetup]
@@ -69,15 +68,15 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public List<Medium> EFCoreRawMedium()
-        {
-            return context.Medium.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
-        }
-
-        [Benchmark]
         public List<Medium> EFCoreInterpolatedMedium()
         {
             return context.Medium.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
+        }
+
+        [Benchmark]
+        public List<Medium> EFCoreRawMedium()
+        {
+            return context.Medium.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
         }
 
         [Benchmark]

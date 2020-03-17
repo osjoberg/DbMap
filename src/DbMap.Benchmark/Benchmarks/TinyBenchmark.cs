@@ -15,13 +15,13 @@ using RepoDb;
 namespace DbMap.Benchmark.Benchmarks
 {
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
-    public class SmallBenchmark
+    public class TinyBenchmark
     {
         private static readonly int p1 = 1;
 
-        private static readonly string Sql = $"SELECT {string.Join(", ", Small.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Small WHERE @p1 = 1";
+        private static readonly string Sql = $"SELECT {string.Join(", ", Tiny.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Tiny WHERE @p1 = 1";
         private static readonly string SqlEFRaw = Regex.Replace(Sql, "@p([0-9]+)", match => "{" + (int.Parse(match.Groups[1].Value) - 1) + "}");
-        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Int32], [String], [NullableBoolean], [NullableInt32], [NullableString] FROM Small WHERE {p1} = 1";
+        private static readonly FormattableString SqlEFInterpolated = $"SELECT [String] FROM Tiny WHERE {p1} = 1";
 
         private static readonly object Parameters = new { p1 };
         private static readonly object[] ParametersArray = { p1 };
@@ -57,39 +57,39 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public Small EFCoreLinqSmall()
+        public string EFCoreLinqTiny()
         {
-            return context.Small.Where(small => p1 == 1).AsNoTracking().FirstOrDefault();
+            return context.Tiny.Where(tiny => p1 == 1).Select(tiny => tiny.String).AsNoTracking().First();
         }
 
         [Benchmark]
-        public Small EFCoreInterpolatedSmall()
+        public string EFCoreInterpolatedTiny()
         {
-            return context.Small.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().FirstOrDefault();
+            return context.Tiny.FromSqlInterpolated(SqlEFInterpolated).Select(tiny => tiny.String).AsNoTracking().First();
         }
 
         [Benchmark]
-        public Small EFCoreRawSmall()
+        public string EFCoreRawTiny()
         {
-            return context.Small.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().FirstOrDefault();
+            return context.Tiny.FromSqlRaw(SqlEFRaw, ParametersArray).Select(tiny => tiny.String).AsNoTracking().First();
         }
 
         [Benchmark]
-        public Small DapperSmall()
+        public string DapperTiny()
         {
-            return connection.QueryFirstOrDefault<Small>(Sql, Parameters);
+            return SqlMapper.ExecuteScalar<string>(connection, Sql, Parameters);
         }
 
         [Benchmark]
-        public Small RepoDbSmall()
+        public string RepoDbTiny()
         {
-            return connection.ExecuteQuery<Small>(Sql, Parameters).FirstOrDefault();
+            return DbConnectionExtension.ExecuteScalar<string>(connection, Sql, Parameters);
         }
 
         [Benchmark(Baseline = true)]
-        public Small DbMapSmall()
+        public string DbMapTiny()
         {
-            return Query.QueryFirstOrDefault<Small>(connection, Parameters);
+            return Query.ExecuteScalar<string>(connection, Parameters);
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DbMap.Benchmark
 {
-    public class Small
+    public class ExtraSmall
     {
         public bool Boolean { get; set; }
 
@@ -34,11 +34,11 @@ namespace DbMap.Benchmark
             };
         }
 
-        public static string[] GetAllPropertyNames() => typeof(Small).GetProperties().Select(property => property.Name).ToArray();
+        public static string[] GetAllPropertyNames() => typeof(ExtraSmall).GetProperties().Select(property => property.Name).ToArray();
 
         public override bool Equals(object obj)
         {
-            return this.Equals((Small)obj);
+            return Equals((ExtraSmall)obj);
         }
 
         public override int GetHashCode()
@@ -46,7 +46,7 @@ namespace DbMap.Benchmark
             throw new NotImplementedException();
         }
 
-        protected bool Equals(Small other)
+        protected bool Equals(ExtraSmall other)
         {
             return Boolean == other.Boolean && Int32 == other.Int32 && String == other.String && NullableBoolean == other.NullableBoolean && NullableInt32 == other.NullableInt32 && NullableString == other.NullableString;
         }

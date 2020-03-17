@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -15,13 +16,13 @@ using RepoDb;
 namespace DbMap.Benchmark.Benchmarks
 {
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
-    public class SmallBenchmark
+    public class ExtraSmallBenchmark
     {
         private static readonly int p1 = 1;
 
-        private static readonly string Sql = $"SELECT {string.Join(", ", Small.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Small WHERE @p1 = 1";
+        private static readonly string Sql = $"SELECT {string.Join(", ", ExtraSmall.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM ExtraSmall WHERE @p1 <> 1";
         private static readonly string SqlEFRaw = Regex.Replace(Sql, "@p([0-9]+)", match => "{" + (int.Parse(match.Groups[1].Value) - 1) + "}");
-        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Int32], [String], [NullableBoolean], [NullableInt32], [NullableString] FROM Small WHERE {p1} = 1";
+        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Int32], [String], [NullableBoolean], [NullableInt32], [NullableString] FROM ExtraSmall WHERE {p1} <> 1";
 
         private static readonly object Parameters = new { p1 };
         private static readonly object[] ParametersArray = { p1 };
@@ -57,39 +58,39 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public Small EFCoreLinqSmall()
+        public List<ExtraSmall> EFCoreLinqExtraSmall()
         {
-            return context.Small.Where(small => p1 == 1).AsNoTracking().FirstOrDefault();
+            return context.ExtraSmall.Where(extraSmall => p1 != 1).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public Small EFCoreInterpolatedSmall()
+        public List<ExtraSmall> EFCoreInterpolatedExtraSmall()
         {
-            return context.Small.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().FirstOrDefault();
+            return context.ExtraSmall.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public Small EFCoreRawSmall()
+        public List<ExtraSmall> EFCoreRawExtraSmall()
         {
-            return context.Small.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().FirstOrDefault();
+            return context.ExtraSmall.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public Small DapperSmall()
+        public List<ExtraSmall> DapperExtraSmall()
         {
-            return connection.QueryFirstOrDefault<Small>(Sql, Parameters);
+            return connection.Query<ExtraSmall>(Sql, Parameters).AsList();
         }
 
         [Benchmark]
-        public Small RepoDbSmall()
+        public List<ExtraSmall> RepoDbExtraSmall()
         {
-            return connection.ExecuteQuery<Small>(Sql, Parameters).FirstOrDefault();
+            return connection.ExecuteQuery<ExtraSmall>(Sql, Parameters).AsList();
         }
 
         [Benchmark(Baseline = true)]
-        public Small DbMapSmall()
+        public List<ExtraSmall> DbMapExtraSmall()
         {
-            return Query.QueryFirstOrDefault<Small>(connection, Parameters);
+            return Query.Query<ExtraSmall>(connection, Parameters).AsList();
         }
     }
 }

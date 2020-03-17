@@ -14,10 +14,13 @@ namespace DbMap.Benchmark
         public static void Main(string[] args)
         {
             DatabaseInitialize.Initialize();
-            
+
+            Run<TinyBenchmark>();
+            Run<ExtraSmallBenchmark>();
             Run<SmallBenchmark>();
             Run<MediumBenchmark>();
             Run<LargeBenchmark>();
+            Run<ExtraLargeBenchmark>();
 
             Console.ReadLine();
         }

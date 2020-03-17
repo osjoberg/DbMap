@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace DbMap.Benchmark
 {
-    public class Large
+    public class ExtraLarge
     {
         public bool Boolean { get; set; }
 
@@ -82,21 +82,21 @@ namespace DbMap.Benchmark
             };
         }
 
-        public static string[] GetAllPropertyNames() => typeof(Large).GetProperties().Select(property => property.Name).ToArray();
+        public static string[] GetAllPropertyNames() => typeof(ExtraLarge).GetProperties().Select(property => property.Name).ToArray();
 
         public override bool Equals(object obj)
         {
-            return this.Equals((Large)obj);
+            return Equals((ExtraLarge)obj);
+        }
+
+        protected bool Equals(ExtraLarge other)
+        {
+            return Boolean == other.Boolean && Byte == other.Byte && DateTime.Equals(other.DateTime) && Decimal == other.Decimal && Double.Equals(other.Double) && Guid.Equals(other.Guid) && Int16 == other.Int16 && Int32 == other.Int32 && Int64 == other.Int64 && Single.Equals(other.Single) && String == other.String && NullableBoolean == other.NullableBoolean && NullableByte == other.NullableByte && Nullable.Equals(NullableDateTime, other.NullableDateTime) && NullableDecimal == other.NullableDecimal && Nullable.Equals(NullableDouble, other.NullableDouble) && Nullable.Equals(NullableGuid, other.NullableGuid) && NullableInt16 == other.NullableInt16 && NullableInt32 == other.NullableInt32 && NullableInt64 == other.NullableInt64 && Nullable.Equals(NullableSingle, other.NullableSingle) && NullableString == other.NullableString;
         }
 
         public override int GetHashCode()
         {
             throw new NotImplementedException();
-        }
-
-        protected bool Equals(Large other)
-        {
-            return Boolean == other.Boolean && Byte == other.Byte && DateTime.Equals(other.DateTime) && Decimal == other.Decimal && Double.Equals(other.Double) && Guid.Equals(other.Guid) && Int16 == other.Int16 && Int32 == other.Int32 && Int64 == other.Int64 && Single.Equals(other.Single) && String == other.String && NullableBoolean == other.NullableBoolean && NullableByte == other.NullableByte && Nullable.Equals(NullableDateTime, other.NullableDateTime) && NullableDecimal == other.NullableDecimal && Nullable.Equals(NullableDouble, other.NullableDouble) && Nullable.Equals(NullableGuid, other.NullableGuid) && NullableInt16 == other.NullableInt16 && NullableInt32 == other.NullableInt32 && NullableInt64 == other.NullableInt64 && Nullable.Equals(NullableSingle, other.NullableSingle) && NullableString == other.NullableString;
         }
     }
 }
