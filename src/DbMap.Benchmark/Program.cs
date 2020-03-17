@@ -5,7 +5,7 @@ using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
-using DbMap.Benchmark.Benchmarks;
+using DbMap.Benchmark.BenchmarkSuite;
 
 namespace DbMap.Benchmark
 {

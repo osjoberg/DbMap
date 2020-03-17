@@ -13,10 +13,10 @@ using Microsoft.EntityFrameworkCore;
 
 using RepoDb;
 
-namespace DbMap.Benchmark.Benchmarks
+namespace DbMap.Benchmark.BenchmarkSuite
 {
-    [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 1000)]
-    public class LargeBenchmark
+    [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 100)]
+    public class ExtraLargeBenchmark
     {
         private static readonly int p1 = 1;
         private static readonly int p2 = 2;
@@ -29,9 +29,9 @@ namespace DbMap.Benchmark.Benchmarks
         private static readonly int p9 = 9;
         private static readonly int p10 = 10;
 
-        private static readonly string Sql = $"SELECT {string.Join(", ", Large.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Large WHERE @p1 <> @p2 OR @p3 <> @p4 OR @p5 <> @p6 OR @p7 <> @p8 OR @p9 <> @p10";
+        private static readonly string Sql = $"SELECT {string.Join(", ", ExtraLarge.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM ExtraLarge WHERE @p1 <> @p2 OR @p3 <> @p4 OR @p5 <> @p6 OR @p7 <> @p8 OR @p9 <> @p10";
         private static readonly string SqlEFRaw = Regex.Replace(Sql, "@p([0-9]+)", match => "{" + (int.Parse(match.Groups[1].Value) - 1) + "}");
-        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Byte], [DateTime], [Decimal], [Double], [Guid], [Int16], [Int32], [Int64], [Single], [String], [NullableBoolean], [NullableByte], [NullableDateTime], [NullableDecimal], [NullableDouble], [NullableGuid], [NullableInt16], [NullableInt32], [NullableInt64], [NullableSingle], [NullableString] FROM Large WHERE {p1} <> {p2} OR {p3} <> {p4} OR {p5} <> {p6} OR {p7} <> {p8} OR {p9} <> {p10}";
+        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Byte], [DateTime], [Decimal], [Double], [Guid], [Int16], [Int32], [Int64], [Single], [String], [NullableBoolean], [NullableByte], [NullableDateTime], [NullableDecimal], [NullableDouble], [NullableGuid], [NullableInt16], [NullableInt32], [NullableInt64], [NullableSingle], [NullableString] FROM ExtraLarge WHERE {p1} <> {p2} OR {p3} <> {p4} OR {p5} <> {p6} OR {p7} <> {p8} OR {p9} <> {p10}";
         private static readonly object Parameters = new { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 };
         private static readonly object[] ParametersArray = { p1, p2, p3, p4, p5, p6, p7, p8, p9, p10 };
         private static readonly DbQuery Query = new DbQuery(Sql);
@@ -66,39 +66,39 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public List<Large> EFCoreLinqLarge()
+        public List<ExtraLarge> EFCoreLinqExtraLarge()
         {
-            return context.Large.Where(large => p1 != p2 || p3 != p4 || p5 != p6 || p7 != p8 || p9 != p10).AsNoTracking().AsList();
+            return context.ExtraLarge.Where(extraLarge => p1 != p2 || p3 != p4 || p5 != p6 || p7 != p8 || p9 != p10).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public List<Large> EFCoreInterpolatedLarge()
+        public List<ExtraLarge> EFCoreInterpolatedExtraLarge()
         {
-            return context.Large.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
+            return context.ExtraLarge.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public List<Large> EFCoreRawLarge()
+        public List<ExtraLarge> EFCoreRawExtraLarge()
         {
-            return context.Large.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
+            return context.ExtraLarge.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public List<Large> DapperLarge()
+        public List<ExtraLarge> DapperExtraLarge()
         {
-            return connection.Query<Large>(Sql, Parameters).AsList();
+            return connection.Query<ExtraLarge>(Sql, Parameters).AsList();
         }
 
         [Benchmark]
-        public List<Large> RepoDbLarge()
+        public List<ExtraLarge> RepoDbExtraLarge()
         {
-            return connection.ExecuteQuery<Large>(Sql, Parameters).AsList();
+            return connection.ExecuteQuery<ExtraLarge>(Sql, Parameters).AsList();
         }
 
         [Benchmark(Baseline = true)]
-        public List<Large> DbMapLarge()
+        public List<ExtraLarge> DbMapExtraLarge()
         {
-            return Query.Query<Large>(connection, Parameters).AsList();
+            return Query.Query<ExtraLarge>(connection, Parameters).AsList();
         }
     }
 }

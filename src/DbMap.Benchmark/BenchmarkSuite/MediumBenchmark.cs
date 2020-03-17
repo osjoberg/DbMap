@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -12,19 +13,23 @@ using Microsoft.EntityFrameworkCore;
 
 using RepoDb;
 
-namespace DbMap.Benchmark.Benchmarks
+namespace DbMap.Benchmark.BenchmarkSuite
 {
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
-    public class TinyBenchmark
+    public class MediumBenchmark
     {
         private static readonly int p1 = 1;
+        private static readonly int p2 = 2;
+        private static readonly int p3 = 3;
+        private static readonly int p4 = 4;
+        private static readonly int p5 = 5;
 
-        private static readonly string Sql = $"SELECT {string.Join(", ", Tiny.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Tiny WHERE @p1 = 1";
+        private static readonly string Sql = $"SELECT {string.Join(", ", Medium.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Medium WHERE @p1 <> @p2 OR @p3 <> @p4 OR @p5 <> 0";
         private static readonly string SqlEFRaw = Regex.Replace(Sql, "@p([0-9]+)", match => "{" + (int.Parse(match.Groups[1].Value) - 1) + "}");
-        private static readonly FormattableString SqlEFInterpolated = $"SELECT [String] FROM Tiny WHERE {p1} = 1";
+        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Decimal], [Double], [Int32], [String], [NullableBoolean], [NullableDecimal], [NullableDouble], [NullableInt32], [NullableString] FROM Medium WHERE {p1} <> {p2} OR {p3} <> {p4} OR {p5} <> 0";
 
-        private static readonly object Parameters = new { p1 };
-        private static readonly object[] ParametersArray = { p1 };
+        private static readonly object Parameters = new { p1, p2, p3, p4, p5 };
+        private static readonly object[] ParametersArray = { p1, p2, p3, p4, p5 };
         private static readonly DbQuery Query = new DbQuery(Sql);
 
         private SqlConnection connection;
@@ -57,39 +62,39 @@ namespace DbMap.Benchmark.Benchmarks
         }
 
         [Benchmark]
-        public string EFCoreLinqTiny()
+        public List<Medium> EFCoreLinqMedium()
         {
-            return context.Tiny.Where(tiny => p1 == 1).Select(tiny => tiny.String).AsNoTracking().First();
+            return context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public string EFCoreInterpolatedTiny()
+        public List<Medium> EFCoreInterpolatedMedium()
         {
-            return context.Tiny.FromSqlInterpolated(SqlEFInterpolated).Select(tiny => tiny.String).AsNoTracking().First();
+            return context.Medium.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public string EFCoreRawTiny()
+        public List<Medium> EFCoreRawMedium()
         {
-            return context.Tiny.FromSqlRaw(SqlEFRaw, ParametersArray).Select(tiny => tiny.String).AsNoTracking().First();
+            return context.Medium.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
         }
 
         [Benchmark]
-        public string DapperTiny()
+        public List<Medium> DapperMedium()
         {
-            return SqlMapper.ExecuteScalar<string>(connection, Sql, Parameters);
+            return connection.Query<Medium>(Sql, Parameters).AsList();
         }
 
         [Benchmark]
-        public string RepoDbTiny()
+        public List<Medium> RepoDbMedium()
         {
-            return DbConnectionExtension.ExecuteScalar<string>(connection, Sql, Parameters);
+            return connection.ExecuteQuery<Medium>(Sql, Parameters).AsList();
         }
 
         [Benchmark(Baseline = true)]
-        public string DbMapTiny()
+        public List<Medium> DbMapMedium()
         {
-            return Query.ExecuteScalar<string>(connection, Parameters);
+            return Query.Query<Medium>(connection, Parameters).AsList();
         }
     }
 }
