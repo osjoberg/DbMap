@@ -6,36 +6,12 @@ namespace DbMap.Deserialization
     internal static class DataReaderDeserializerCache
     {
         private static readonly CacheItemComparer CacheItemComparerInstance = new CacheItemComparer();
-        private static readonly TypeComparer TypeComparerInstance = new TypeComparer();
-
         private static readonly object CacheLock = new object();
-
-        private static Dictionary<Type, DataReaderDeserializer> clrCache = new Dictionary<Type, DataReaderDeserializer>(TypeComparerInstance);
         private static Dictionary<CacheItem, DataReaderDeserializer> cache = new Dictionary<CacheItem, DataReaderDeserializer>(CacheItemComparerInstance);
 
-        internal static DataReaderDeserializer GetCachedOrBuildNew(Type type, string[] columnNames)
+        internal static DataReaderDeserializer GetCachedOrBuildNew(Type type, string[] columnNames, Type[] columnTypes)
         {
-            if (columnNames == null)
-            {
-                if (clrCache.TryGetValue(type, out var clrValue))
-                {
-                    return clrValue;
-                }
-
-                lock (CacheLock)
-                {
-                    if (clrCache.TryGetValue(type, out clrValue))
-                    {
-                        return clrValue;
-                    }
-
-                    clrValue = DataReaderDeserializer.Create(type, null);
-                    clrCache = new Dictionary<Type, DataReaderDeserializer>(clrCache, TypeComparerInstance) { { type, clrValue } };
-                    return clrValue;
-                }
-            }
-
-            var item = new CacheItem(type, columnNames);
+            var item = new CacheItem(type, columnNames, columnTypes);
             if (cache.TryGetValue(item, out var value))
             {
                 return value;
@@ -48,7 +24,7 @@ namespace DbMap.Deserialization
                     return value;
                 }
 
-                value = DataReaderDeserializer.Create(type, columnNames);
+                value = DataReaderDeserializer.Create(type, columnNames, columnTypes);
                 cache = new Dictionary<CacheItem, DataReaderDeserializer>(cache, CacheItemComparerInstance) { { item, value } };
                 return value;
             }
@@ -56,15 +32,18 @@ namespace DbMap.Deserialization
 
         private struct CacheItem
         {
-            public CacheItem(Type type, string[] columnNames)
+            public CacheItem(Type type, string[] columnNames, Type[] columnTypes)
             {
                 Type = type;
                 ColumnNames = columnNames;
+                ColumnTypes = columnTypes;
             }
 
             public Type Type { get; }
 
             public string[] ColumnNames { get; }
+
+            public Type[] ColumnTypes { get; }
         }
 
         private class CacheItemComparer : IEqualityComparer<CacheItem>
@@ -89,6 +68,14 @@ namespace DbMap.Deserialization
                     }
                 }
 
+                for (var i = 0; i < x.ColumnTypes.Length; i++)
+                {
+                    if (ReferenceEquals(x.ColumnTypes[i], y.ColumnTypes[i]) == false)
+                    {
+                        return false;
+                    }
+                }
+
                 return true;
             }
 
@@ -96,21 +83,13 @@ namespace DbMap.Deserialization
             {
                 unchecked
                 {
+                    if (obj.ColumnNames.Length == 0)
+                    {
+                        return obj.Type.GetHashCode() ^ obj.ColumnTypes[0].GetHashCode();
+                    }
+
                     return obj.Type.GetHashCode() ^ obj.ColumnNames.Length ^ obj.ColumnNames[0].GetHashCode() ^ obj.ColumnNames[obj.ColumnNames.Length - 1].GetHashCode();
                 }
-            }
-        }
-
-        private class TypeComparer : IEqualityComparer<Type>
-        {
-            public bool Equals(Type x, Type y)
-            {
-                return ReferenceEquals(x, y);
-            }
-
-            public int GetHashCode(Type obj)
-            {
-                return obj.GetHashCode();
             }
         }
     }

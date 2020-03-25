@@ -14,13 +14,14 @@ namespace DbMap
     /// </summary>
     public sealed class DbQuery
     {
+        internal static readonly string[] NoColumnNames = new string[0];
+
         private readonly string sql;
         private readonly CommandType commandType;
         private readonly int? commandTimeout;
 
         private ParametersSerializer parametersSerializer;
         private DataReaderDeserializer dataReaderDeserializer;
-        private ScalarDeserializer scalarDeserializer;
 
         private Type returnType;
         private Type parametersType;
@@ -61,34 +62,6 @@ namespace DbMap
             using (var command = SetupCommand(connection, parameters, transaction))
             {
                 return command.ExecuteNonQuery();
-            }
-        }
-
-        /// <summary>
-        /// Execute query and returns the first column of the first row.
-        /// </summary>
-        /// <typeparam name="TReturn">Type of scalar value.</typeparam>
-        /// <param name="connection">Database connection.</param>
-        /// <param name="parameters">Query parameters.</param>
-        /// <param name="transaction">Transaction to use.</param>
-        /// <returns>Value of the first column of the first row.</returns>
-        public TReturn ExecuteScalar<TReturn>(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
-        {
-            if (connection == null)
-            {
-                ThrowException.ValueCannotBeNull(nameof(connection));
-            }
-
-            using (var command = SetupCommand(connection, parameters, transaction))
-            {
-                if (ReferenceEquals(typeof(TReturn), returnType) == false)
-                {
-                    returnType = typeof(TReturn);
-                    scalarDeserializer = ScalarDeserializerCache.GetCachedOrBuildNew(returnType);
-                }
-
-                var scalar = command.ExecuteScalar();
-                return scalarDeserializer.Deserialize<TReturn>(scalar); 
             }
         }
 
@@ -214,8 +187,9 @@ namespace DbMap
             }
 
             returnType = type;
-            var columnNames = DbQueryInternal.IsClrType(type) ? null : DbQueryInternal.GetColumnNames(reader);
-            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(type, columnNames);
+            var columnNames = DbQueryInternal.IsClrType(type) ? NoColumnNames : DbQueryInternal.GetColumnNames(reader);
+            var columnTypes = DbQueryInternal.GetColumnTypes(reader);
+            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(type, columnNames, columnTypes);
         }
 
         private IDbCommand SetupCommand(IDbConnection connection, object parameters, IDbTransaction transaction)

@@ -17,7 +17,7 @@ namespace DbMap.Test.Deserialization
                 Value3 = "Initialized value 3",
             };
 
-            DbAssert.AreEqual(expected, "SELECT NULL AS Value1, 'New value 2' AS Value2", false);
+            DbAssert.AreEqual(expected, "SELECT CAST(NULL AS NVARCHAR(10)) AS Value1, 'New value 2' AS Value2", false);
         }
 
         [TestMethod]

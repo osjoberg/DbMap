@@ -18,8 +18,8 @@ namespace DbMap.Serialization
         {
             var moduleBuilder = DynamicAssembly.GetExistingDynamicAssemblyOrCreateNew(parametersType.Assembly);
 
-            var typeName = DynamicAssembly.GetUniqueTypeName("Daf.Map.Runtime." + parametersType.Name + "ParametersSerializer");
-            var typeBuilder = moduleBuilder.DefineType(typeName, TypeAttributes.Public | TypeAttributes.Sealed, typeof(ParametersSerializer), Type.EmptyTypes);
+            var typeName = DynamicAssembly.GetUniqueTypeName("Daf.Map.Runtime." + parametersType.Name + nameof(ParametersSerializer));
+            var typeBuilder = moduleBuilder.DefineType(typeName, TypeAttributes.Sealed, typeof(ParametersSerializer), Type.EmptyTypes);
 
             // Serialize().
             {

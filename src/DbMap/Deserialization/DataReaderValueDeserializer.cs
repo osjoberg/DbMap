@@ -8,6 +8,7 @@ namespace DbMap.Deserialization
 {
     internal class DataReaderValueDeserializer
     {
+        private readonly Type sourceType;
         private readonly Type type;
         private readonly int ordinal;
         private readonly MethodInfo getValueMethod;
@@ -15,26 +16,23 @@ namespace DbMap.Deserialization
         private readonly FieldInfo fieldInfo;
         private readonly PropertyInfo propertyInfo;
 
-        public DataReaderValueDeserializer(Type type, int ordinal)
+        public DataReaderValueDeserializer(Type sourceType, Type type, int ordinal)
         {
+            this.sourceType = sourceType;
             this.type = type;
             this.ordinal = ordinal;
 
             nullableInfo = NullableInfo.GetNullable(type);
 
-            getValueMethod = DbDataReaderMetadata.GetGetValueMethodFromType(nullableInfo?.UnderlyingType ?? type);
-            if (getValueMethod == null)
-            {
-                ThrowException.NotSupported();
-            }
+            getValueMethod = DbDataReaderMetadata.GetGetValueMethodFromType(sourceType, nullableInfo?.UnderlyingType ?? type);
         }
 
-        public DataReaderValueDeserializer(FieldInfo fieldInfo, int ordinal) : this(fieldInfo.FieldType, ordinal)
+        public DataReaderValueDeserializer(Type sourceType, FieldInfo fieldInfo, int ordinal) : this(sourceType, fieldInfo.FieldType, ordinal)
         {
             this.fieldInfo = fieldInfo;
         }
 
-        public DataReaderValueDeserializer(PropertyInfo propertyInfo, int ordinal) : this(propertyInfo.PropertyType, ordinal)
+        public DataReaderValueDeserializer(Type sourceType, PropertyInfo propertyInfo, int ordinal) : this(sourceType, propertyInfo.PropertyType, ordinal)
         {
             this.propertyInfo = propertyInfo;
         }
@@ -57,6 +55,7 @@ namespace DbMap.Deserialization
             if (hasRequiredAttribute || (nullableInfo == null && type.IsClass == false))
             {
                 EmitGetValue(il);
+                EmitConversion(il);
             }
             else
             {
@@ -68,13 +67,14 @@ namespace DbMap.Deserialization
         {
             var completeLabel = il.DefineLabel();
 
-            il.Invoke(DbDataReaderMetadata.IsDBNull, ordinal);
+            EmitInvoke(il, DbDataReaderMetadata.IsDBNull, ordinal);
             il.Emit(OpCodes.Brtrue_S, completeLabel);
 
             // Not null
             {
                 EmitLoadUserType(il);
                 EmitGetValue(il);
+                EmitConversion(il);
                 EmitWrapNullable(il);
                 EmitAssignProperty(il);
             }
@@ -92,13 +92,14 @@ namespace DbMap.Deserialization
              var completeLabel = il.DefineLabel();
 
              EmitNull(il);
-             il.Invoke(DbDataReaderMetadata.IsDBNull, ordinal);
+             EmitInvoke(il, DbDataReaderMetadata.IsDBNull, ordinal);
              il.Emit(OpCodes.Brtrue_S, completeLabel);
 
              // Not null
              {
                  il.Emit(OpCodes.Pop);
-                 il.Invoke(getValueMethod, ordinal);
+                 EmitGetValue(il);
+                 EmitConversion(il);
                  EmitWrapNullable(il);
              }
 
@@ -107,7 +108,12 @@ namespace DbMap.Deserialization
 
         private void EmitGetValue(ILGenerator il)
         {
-            il.Invoke(getValueMethod, ordinal);
+            EmitInvoke(il, getValueMethod, ordinal);
+        }
+
+        private void EmitConversion(ILGenerator il)
+        {
+            TypeConverter.EmitConversion(il, sourceType, nullableInfo?.UnderlyingType ?? type);
         }
 
         private void EmitNull(ILGenerator il)
@@ -140,6 +146,13 @@ namespace DbMap.Deserialization
             {
                 il.Emit(OpCodes.Callvirt, propertyInfo.GetSetMethod());
             }
+        }
+
+        private void EmitInvoke(ILGenerator il, MethodInfo method, int argument0)
+        {
+            il.Emit(OpCodes.Ldarg_1);
+            il.Emit(OpCodes.Ldc_I4, argument0);
+            il.Emit(OpCodes.Callvirt, method);
         }
     }
 }

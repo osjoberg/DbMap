@@ -27,9 +27,9 @@ namespace DbMap.Deserialization
         private static readonly MethodInfo GetGuid = Type.GetMethod(nameof(DbDataReader.GetGuid));
         private static readonly MethodInfo GetValue = Type.GetMethod(nameof(DbDataReader.GetValue));
 
-        public static MethodInfo GetGetValueMethodFromType(Type underlyingType)
+        public static MethodInfo GetGetValueMethodFromType(Type sourceType, Type underlyingType)
         {
-            switch (Type.GetTypeCode(underlyingType))
+            switch (Type.GetTypeCode(sourceType))
             {
                 case TypeCode.Boolean:
                     return GetBoolean;
@@ -65,12 +65,12 @@ namespace DbMap.Deserialization
                     return GetString;
 
                 default:
-                    if (underlyingType.IsArray)
+                    if (ReferenceEquals(sourceType, typeof(byte[])))
                     {
                         return GetValue;
                     }
 
-                    if (ReferenceEquals(underlyingType, typeof(Guid)))
+                    if (ReferenceEquals(sourceType, typeof(Guid)))
                     {
                         return GetGuid;
                     }

@@ -8,7 +8,7 @@ namespace DbMap.Test.Deserialization
         [TestMethod]
         public void CanDeserializeNullString()
         {
-            DbAssert.AreEqual<string>(null, "SELECT NULL");
+            DbAssert.AreEqual<string>(null, "SELECT CAST(NULL AS NVARCHAR(10))");
         }
 
         [TestMethod]

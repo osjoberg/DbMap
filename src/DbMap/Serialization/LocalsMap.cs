@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
 
-namespace DbMap.Infrastructure
+namespace DbMap.Serialization
 {
     internal class LocalsMap
     {

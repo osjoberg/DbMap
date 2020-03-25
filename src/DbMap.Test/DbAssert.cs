@@ -36,9 +36,6 @@ namespace DbMap.Test
                 return;
             }
 
-            var actualScalar = new DbQuery(query).ExecuteScalar<TReturn>(sqlConnection);
-            Assert.AreEqual(expected, actualScalar);
-
             var actualUserType = new DbQuery(query + " AS Value").QuerySingle<UserType<TReturn>>(sqlConnection).Value;
             Assert.AreEqual(expected, actualUserType);
         }
@@ -53,9 +50,6 @@ namespace DbMap.Test
             var actualQuery = new DbQuery(sql).Query<TReturn?>(sqlConnection).Single();
             Assert.AreEqual(expected, actualQuery);
 
-            var actualScalar = new DbQuery(sql).ExecuteScalar<TReturn?>(sqlConnection);
-            Assert.AreEqual(expected, actualScalar);
-
             var actualUserType = new DbQuery(sql + " AS Value").QuerySingle<UserType<TReturn?>>(sqlConnection).Value;
             Assert.AreEqual(expected, actualUserType);
         }
@@ -69,9 +63,6 @@ namespace DbMap.Test
 
             var actualQuery = new DbQuery(sql).Query<TReturn>(sqlConnection).Single();
             CollectionAssert.AreEqual(expected, actualQuery);
-
-            var actualScalar = new DbQuery(sql).ExecuteScalar<TReturn>(sqlConnection);
-            CollectionAssert.AreEqual(expected, actualScalar);
 
             var actualUserType = new DbQuery(sql + " AS Value").QuerySingle<UserType<TReturn>>(sqlConnection).Value;
             CollectionAssert.AreEqual(expected, actualUserType);

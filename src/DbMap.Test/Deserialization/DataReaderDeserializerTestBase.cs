@@ -6,57 +6,57 @@ namespace DbMap.Test.Deserialization
 {
     public abstract class DataReaderDeserializerTestBase<TReturn> where TReturn : struct
     {
-        private readonly TReturn min;
-        private readonly TReturn max;
-        private readonly string queryFormat;
+        protected readonly string QueryFormat;
+        protected readonly TReturn MinValue;
+        protected readonly TReturn MaxValue;
 
-        protected DataReaderDeserializerTestBase(string queryFormat, TReturn min, TReturn max)
+        protected DataReaderDeserializerTestBase(string queryFormat, TReturn minValue, TReturn maxValue)
         {
-            this.queryFormat = queryFormat;
-            this.min = min;
-            this.max = max;
+            QueryFormat = queryFormat;
+            MinValue = minValue;
+            MaxValue = maxValue;
         }
 
         [TestMethod]
         public virtual void CanDeserializeMaxValue()
         {
-            DbAssert.AreEqual(max, string.Format(CultureInfo.InvariantCulture, queryFormat, max));
+            DbAssert.AreEqual(MaxValue, string.Format(CultureInfo.InvariantCulture, QueryFormat, MaxValue));
         }
 
         [TestMethod]
         public virtual void CanDeserializeDefaultValue()
         {
-            DbAssert.AreEqual<TReturn>(default, string.Format(CultureInfo.InvariantCulture, queryFormat, default(TReturn)));
+            DbAssert.AreEqual<TReturn>(default, string.Format(CultureInfo.InvariantCulture, QueryFormat, default(TReturn)));
         }
 
         [TestMethod]
         public virtual void CanDeserializeMinValue()
         {
-            DbAssert.AreEqual(min, string.Format(CultureInfo.InvariantCulture, queryFormat, min));
+            DbAssert.AreEqual(MinValue, string.Format(CultureInfo.InvariantCulture, QueryFormat, MinValue));
         }
 
         [TestMethod]
         public virtual void CanDeserializeNullableMaxValue()
         {
-            DbAssert.AreEqual((TReturn?)max, string.Format(CultureInfo.InvariantCulture, queryFormat, max));
+            DbAssert.AreEqual((TReturn?)MaxValue, string.Format(CultureInfo.InvariantCulture, QueryFormat, MaxValue));
         }
 
         [TestMethod]
         public virtual void CanDeserializeNullableDefaultValue()
         {
-            DbAssert.AreEqual((TReturn?)default(TReturn), string.Format(CultureInfo.InvariantCulture, queryFormat, default(TReturn)));
+            DbAssert.AreEqual((TReturn?)default(TReturn), string.Format(CultureInfo.InvariantCulture, QueryFormat, default(TReturn)));
         }
 
         [TestMethod]
         public virtual void CanDeserializeNullableMinValue()
         {
-            DbAssert.AreEqual((TReturn?)min, string.Format(CultureInfo.InvariantCulture, queryFormat, min));
+            DbAssert.AreEqual((TReturn?)MinValue, string.Format(CultureInfo.InvariantCulture, QueryFormat, MinValue));
         }
 
         [TestMethod]
-        public void CanDeserializeNullableNullValue()
+        public virtual void CanDeserializeNullableNullValue()
         {
-            DbAssert.AreEqual<TReturn>(null, string.Format(CultureInfo.InvariantCulture, queryFormat, "NULL"));
+            DbAssert.AreEqual<TReturn>(null, string.Format(CultureInfo.InvariantCulture, QueryFormat, "NULL"));
         }
     }
 }

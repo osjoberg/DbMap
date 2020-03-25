@@ -13,14 +13,18 @@ namespace DbMap.Infrastructure
             switch (Type.GetTypeCode(underlyingType))
             {
                 case TypeCode.Boolean:
+                case TypeCode.SByte:
                 case TypeCode.Byte:
                 case TypeCode.Char:
                 case TypeCode.DateTime:
                 case TypeCode.Decimal:
                 case TypeCode.Double:
                 case TypeCode.Int16:
+                case TypeCode.UInt16:
                 case TypeCode.Int32:
+                case TypeCode.UInt32:
                 case TypeCode.Int64:
+                case TypeCode.UInt64:
                 case TypeCode.Single:
                 case TypeCode.String:
                     return true;
@@ -49,6 +53,17 @@ namespace DbMap.Infrastructure
             }
 
             return columnNames;
+        }
+
+        public static Type[] GetColumnTypes(DbDataReader reader)
+        {
+            var columnTypes = new Type[reader.FieldCount];
+            for (var ordinal = 0; ordinal < columnTypes.Length; ordinal++)
+            {
+                columnTypes[ordinal] = reader.GetFieldType(ordinal);
+            }
+
+            return columnTypes;
         }
 
         public static TReturn QueryFirst<TReturn>(DbDataReader reader, DataReaderDeserializer dataReaderDeserializer)

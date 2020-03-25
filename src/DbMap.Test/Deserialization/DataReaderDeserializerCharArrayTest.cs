@@ -8,30 +8,31 @@ namespace DbMap.Test.Deserialization
     public class DataReaderDeserializerCharArrayTest
     {
         [TestMethod]
+        [ExpectedException(typeof(InvalidCastException))]
         public void CanDeserializeNullCharArray()
         {
-            DbAssert.ArrayAreEqual<char[]>(null, "SELECT CAST(NULL AS VARCHAR)");
+            DbAssert.ArrayAreEqual<char[]>(null, "SELECT CAST(NULL AS NVARCHAR(10))");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(EntryPointNotFoundException))]
+        [ExpectedException(typeof(InvalidCastException))]
         public void CanDeserializeEmptyCharArray()
         {
-            DbAssert.ArrayAreEqual(new char[0], "SELECT CAST('' AS VARCHAR)");
+            DbAssert.ArrayAreEqual(new char[0], "SELECT CAST('' AS NVARCHAR(10))");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(EntryPointNotFoundException))]
+        [ExpectedException(typeof(InvalidCastException))]
         public void CanDeserializeOneElementCharArray()
         {
-            DbAssert.ArrayAreEqual(new[] { 'A' }, "SELECT CAST('A' AS VARCHAR)");
+            DbAssert.ArrayAreEqual(new[] { 'A' }, "SELECT CAST('A' AS NVARCHAR(10))");
         }
 
         [TestMethod]
-        [ExpectedException(typeof(EntryPointNotFoundException))]
+        [ExpectedException(typeof(InvalidCastException))]
         public void CanDeserializeTwoElementCharArray()
         {
-            DbAssert.ArrayAreEqual(new[] { 'A', 'B' }, "SELECT CAST('AB' AS VARCHAR)");
+            DbAssert.ArrayAreEqual(new[] { 'A', 'B' }, "SELECT CAST('AB' AS NVARCHAR(10))");
         }
     }
 }

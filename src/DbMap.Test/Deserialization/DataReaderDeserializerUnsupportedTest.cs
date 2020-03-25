@@ -8,7 +8,7 @@ namespace DbMap.Test.Deserialization
     public class DataReaderDeserializerUnsupportedTest
     {
         [TestMethod]
-        [ExpectedException(typeof(NotSupportedException))]
+        [ExpectedException(typeof(InvalidCastException))]
         public void DoesNotDeserializeUnsupportedTypes()
         {
             DbAssert.AreEqual(new UserType(), "SELECT CAST(1 AS BIT) AS Value", false);
