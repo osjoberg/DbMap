@@ -47,43 +47,43 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public int DapperNoParameters()
         {
-            return SqlMapper.ExecuteScalar<int>(sqlConnection, NoParameterSql);
+            return SqlMapper.Execute(sqlConnection, NoParameterSql);
         }
 
         [Benchmark]
         public int RepoDbNoParameters()
         {
-            return DbConnectionExtension.ExecuteScalar<int>(sqlConnection, NoParameterSql);
+            return DbConnectionExtension.ExecuteNonQuery(sqlConnection, NoParameterSql);
         }
 
         [Benchmark]
         public int DbQueryNoParameters()
         {
-            return NoParameterQuery.ExecuteScalar<int>(sqlConnection);
+            return NoParameterQuery.Execute(sqlConnection);
         }
 
         [Benchmark]
         public int DapperOneParameter()
         {
-            return SqlMapper.ExecuteScalar<int>(sqlConnection, OneParameterSql, OneParameter);
+            return SqlMapper.Execute(sqlConnection, OneParameterSql, OneParameter);
         }
 
         [Benchmark]
         public int RepoDbOneParameter()
         {
-            return DbConnectionExtension.ExecuteScalar<int>(sqlConnection, OneParameterSql, OneParameter);
+            return DbConnectionExtension.ExecuteNonQuery(sqlConnection, OneParameterSql, OneParameter);
         }
 
         [Benchmark]
         public int DbQueryOneParameter()
         {
-            return OneParameterQuery.ExecuteScalar<int>(sqlConnection, OneParameter);
+            return OneParameterQuery.Execute(sqlConnection, OneParameter);
         }
 
         [Benchmark]
         public int DapperTenParameters()
         {
-            return SqlMapper.ExecuteScalar<int>(sqlConnection, TenParametersSql, TenParameters);
+            return SqlMapper.Execute(sqlConnection, TenParametersSql, TenParameters);
         }
 
         [Benchmark]
@@ -95,7 +95,7 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public int DbQueryTenParameters()
         {
-            return TenParametersQuery.ExecuteScalar<int>(sqlConnection, TenParameters);
+            return TenParametersQuery.Execute(sqlConnection, TenParameters);
         }
     }
 }

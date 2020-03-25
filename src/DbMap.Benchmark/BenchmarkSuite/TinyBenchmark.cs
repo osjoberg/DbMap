@@ -89,7 +89,7 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark(Baseline = true)]
         public string DbMapTiny()
         {
-            return Query.ExecuteScalar<string>(connection, Parameters);
+            return Query.QueryFirst<string>(connection, Parameters);
         }
     }
 }
