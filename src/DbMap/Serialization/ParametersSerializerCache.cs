@@ -25,7 +25,7 @@ namespace DbMap.Serialization
                     return value;
                 }
 
-                value = ParametersSerializer.Create(dataParameterType, parametersType);
+                value = ParametersSerializerFactory.Create(dataParameterType, parametersType);
                 cache = new Dictionary<CacheItem, ParametersSerializer>(cache, Comparer) { { cacheItem, value } };
                 return value;
             }

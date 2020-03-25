@@ -9,13 +9,9 @@ using DbMap.Infrastructure;
 
 namespace DbMap.Deserialization
 {
-    public abstract class DataReaderDeserializer
+    internal static class DataReaderDeserializerFactory
     {
         private static readonly Type[] DeserializeAllParameters = { DbCommandMetadata.Type, DbDataReaderMetadata.Type };
-
-        public abstract TReturn Deserialize<TReturn>(DbDataReader reader);
-
-        public abstract IEnumerable<TReturn> DeserializeAll<TReturn>(DbCommand command, DbDataReader reader);
 
         internal static DataReaderDeserializer Create(Type type, string[] columnNames, Type[] columnTypes)
         {
@@ -89,7 +85,7 @@ namespace DbMap.Deserialization
             }
 
             // TReturn Deserialize<TReturn>(DBDataReader)
-            var deserializeMethod = typeBuilder.DefineMethod(nameof(Deserialize), MethodAttributes.Public | MethodAttributes.Virtual);
+            var deserializeMethod = typeBuilder.DefineMethod(nameof(DataReaderDeserializer.Deserialize), MethodAttributes.Public | MethodAttributes.Virtual);
             {
                 var returnTypeParameter = deserializeMethod.DefineGenericParameters("TReturn")[0];
 
@@ -103,7 +99,7 @@ namespace DbMap.Deserialization
 
             // IEnumerable<TReturn> DeserializeAll<TReturn>(DbCommand, DbDataReader)
             {
-                var deserializeAllMethod = typeBuilder.DefineMethod(nameof(DeserializeAll), MethodAttributes.Public | MethodAttributes.Virtual);
+                var deserializeAllMethod = typeBuilder.DefineMethod(nameof(DataReaderDeserializer.DeserializeAll), MethodAttributes.Public | MethodAttributes.Virtual);
                 var returnTypeParameter = deserializeAllMethod.DefineGenericParameters("TReturn")[0];
 
                 deserializeAllMethod.SetReturnType(typeof(IEnumerable<>).MakeGenericType(returnTypeParameter));

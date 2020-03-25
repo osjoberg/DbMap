@@ -7,12 +7,10 @@ using DbMap.Infrastructure;
 
 namespace DbMap.Serialization
 {
-    public abstract class ParametersSerializer
+    internal static class ParametersSerializerFactory
     {
         private static readonly FieldInfo DbNull = typeof(DBNull).GetField(nameof(DBNull.Value));
         private static readonly MethodInfo ListAdd = typeof(IList).GetMethod(nameof(IList.Add), new[] { typeof(object) });
-
-        public abstract void Serialize(IList parameters, object @object);
 
         internal static ParametersSerializer Create(Type dataParameterType, Type parametersType)
         {
@@ -23,11 +21,11 @@ namespace DbMap.Serialization
 
             // Serialize().
             {
-                var method = typeBuilder.DefineMethod(nameof(Serialize), MethodAttributes.Public | MethodAttributes.Virtual, CallingConventions.Standard, typeof(void), new[] { typeof(IList), typeof(object) });
+                var method = typeBuilder.DefineMethod(nameof(ParametersSerializer.Serialize), MethodAttributes.Public | MethodAttributes.Virtual, CallingConventions.Standard, typeof(void), new[] { typeof(IList), typeof(object) });
                 var il = method.GetILGenerator();
 
                 var locals = new LocalsMap(il);
-                
+
                 var properties = parametersType.GetProperties();
                 for (var parameterIndex = 0; parameterIndex < properties.Length; parameterIndex++)
                 {
@@ -54,7 +52,7 @@ namespace DbMap.Serialization
                         il.Emit(OpCodes.Call, propertyInfo.GetGetMethod());
                     }
 
-                    var nullableInfo = NullableInfo.GetNullable(propertyInfo.PropertyType); 
+                    var nullableInfo = NullableInfo.GetNullable(propertyInfo.PropertyType);
                     if (nullableInfo != null)
                     {
                         var isNotNullLabel = il.DefineLabel();

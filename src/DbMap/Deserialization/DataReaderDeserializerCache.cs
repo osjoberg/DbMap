@@ -24,7 +24,7 @@ namespace DbMap.Deserialization
                     return value;
                 }
 
-                value = DataReaderDeserializer.Create(type, columnNames, columnTypes);
+                value = DataReaderDeserializerFactory.Create(type, columnNames, columnTypes);
                 cache = new Dictionary<CacheItem, DataReaderDeserializer>(cache, CacheItemComparerInstance) { { item, value } };
                 return value;
             }
