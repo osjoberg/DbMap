@@ -14,7 +14,7 @@ namespace DbMap.Test.Deserialization
 
         [TestMethod]
         [ExpectedException(typeof(OverflowException))]
-        public virtual void DeserializeMaxValueToSByteThrowsOverflowException()
+        public void DeserializeMaxValueToSByteThrowsOverflowException()
         {
             DbAssert.AreEqual<sbyte>(0, string.Format(CultureInfo.InvariantCulture, QueryFormat, MaxValue));
         }
