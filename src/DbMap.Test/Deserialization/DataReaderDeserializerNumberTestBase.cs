@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -92,6 +93,12 @@ namespace DbMap.Test.Deserialization
         public virtual void CanDeserializeNonZeroValueToTrueBoolean()
         {
             DbAssert.AreEqual<bool>(true, string.Format(CultureInfo.InvariantCulture, QueryFormat, 127));
+        }
+
+        [TestMethod]
+        public virtual void CanDeserializeValueToObject()
+        {
+            DbAssert.AreEqual<object>(Convert.ChangeType(127, typeof(TReturn)), string.Format(CultureInfo.InvariantCulture, QueryFormat, 127));
         }
     }
 }

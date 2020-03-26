@@ -20,9 +20,15 @@ namespace DbMap.Test.Deserialization
 
         [TestMethod]
         [ExpectedException(typeof(OverflowException))]
-        public virtual void DeserializeMaxValueToSByteThrowsOverflowException()
+        public void DeserializeMaxValueToSByteThrowsOverflowException()
         {
             DbAssert.AreEqual<sbyte>(0, string.Format(CultureInfo.InvariantCulture, QueryFormat, MaxValue));
+        }
+
+        [TestMethod]
+        public override void CanDeserializeValueToObject()
+        {
+            // Not really supported as there is no way to specify the Enum type and at the same time specify object.
         }
     }
 }

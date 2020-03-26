@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Data.Common;
 
-using DbMap.Deserialization;
-
 namespace DbMap.Infrastructure
 {
     internal static class DbQueryInternal
@@ -36,6 +34,11 @@ namespace DbMap.Infrastructure
                     }
 
                     if (ReferenceEquals(underlyingType, typeof(Guid)))
+                    {
+                        return true;
+                    }
+
+                    if (ReferenceEquals(underlyingType, typeof(object)))
                     {
                         return true;
                     }

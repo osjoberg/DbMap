@@ -39,6 +39,12 @@ namespace DbMap.Deserialization
 
         public static void EmitConversion(ILGenerator il, Type from, Type to)
         {
+            if (ReferenceEquals(to, typeof(object)))
+            {
+                il.Emit(OpCodes.Box, from);
+                return;
+            }
+
             var fromTypeCode = Type.GetTypeCode(from);
             var toTypeCode = Type.GetTypeCode(to);
 

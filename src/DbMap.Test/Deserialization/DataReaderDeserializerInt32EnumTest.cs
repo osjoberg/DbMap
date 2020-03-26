@@ -20,44 +20,50 @@ namespace DbMap.Test.Deserialization
 
         [TestMethod]
         [ExpectedException(typeof(OverflowException))]
-        public virtual void DeserializeMaxValueToSByteThrowsOverflowException()
+        public void DeserializeMaxValueToSByteThrowsOverflowException()
         {
             DbAssert.AreEqual<sbyte>(0, string.Format(CultureInfo.InvariantCulture, QueryFormat, MaxValue));
         }
 
         [TestMethod]
         [ExpectedException(typeof(OverflowException))]
-        public virtual void DeserializeMaxValueToByteThrowsOverflowException()
+        public void DeserializeMaxValueToByteThrowsOverflowException()
         {
             DbAssert.AreEqual<byte>(0, string.Format(CultureInfo.InvariantCulture, QueryFormat, MaxValue));
         }
 
         [TestMethod]
         [ExpectedException(typeof(OverflowException))]
-        public virtual void DeserializeMaxValueToInt16ThrowsOverflowException()
+        public void DeserializeMaxValueToInt16ThrowsOverflowException()
         {
             DbAssert.AreEqual<short>(0, string.Format(CultureInfo.InvariantCulture, QueryFormat, MaxValue));
         }
 
         [TestMethod]
         [ExpectedException(typeof(OverflowException))]
-        public virtual void DeserializeMaxValueToUInt16ThrowsOverflowException()
+        public void DeserializeMaxValueToUInt16ThrowsOverflowException()
         {
             DbAssert.AreEqual<ushort>(0, string.Format(CultureInfo.InvariantCulture, QueryFormat, MaxValue));
         }
 
         [TestMethod]
         [ExpectedException(typeof(OverflowException))]
-        public virtual void DeserializeMaxValueToCharThrowsOverflowException()
+        public void DeserializeMaxValueToCharThrowsOverflowException()
         {
             DbAssert.AreEqual<char>('\0', string.Format(CultureInfo.InvariantCulture, QueryFormat, MaxValue));
         }
 
         [TestMethod]
         [ExpectedException(typeof(OverflowException))]
-        public virtual void DeserializeMinValueToUInt32ThrowsOverflowException()
+        public void DeserializeMinValueToUInt32ThrowsOverflowException()
         {
             DbAssert.AreEqual<uint>(0, string.Format(CultureInfo.InvariantCulture, QueryFormat, MinValue));
+        }
+
+        [TestMethod]
+        public override void CanDeserializeValueToObject()
+        {
+            // Not really supported as there is no way to specify the Enum type and at the same time specify object.
         }
     }
 }

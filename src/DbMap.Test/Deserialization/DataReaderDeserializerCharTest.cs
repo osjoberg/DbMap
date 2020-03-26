@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -7,7 +8,7 @@ namespace DbMap.Test.Deserialization
     [TestClass]
     public class DataReaderDeserializerCharTest : DataReaderDeserializerNumberTestBase<char>
     { 
-        public DataReaderDeserializerCharTest() : base("SELECT CAST(IIF('{0}' = 'NULL', NULL, '{0}') AS NCHAR)", char.MinValue, char.MaxValue)
+        public DataReaderDeserializerCharTest() : base("SELECT CAST(IIF('{0}' = 'NULL', NULL, '{0}') AS NVARCHAR)", char.MinValue, char.MaxValue)
         {
         }
 
@@ -156,6 +157,12 @@ namespace DbMap.Test.Deserialization
         public override void CanDeserializeNonZeroValueToTrueBoolean()
         {
             base.CanDeserializeNonZeroValueToTrueBoolean();
+        }
+
+        [TestMethod]
+        public override void CanDeserializeValueToObject()
+        {
+            // Not really supported as there is no way to specify the char/string type and at the same time specify object.
         }
     }
 }
