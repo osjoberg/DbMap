@@ -2,12 +2,15 @@
 using System.Data.Common;
 using System.Reflection;
 
+using DbMap.Infrastructure;
+
 namespace DbMap.Deserialization
 {
     internal static class DbDataReaderMetadata
     {
         public static readonly Type Type = typeof(DbDataReader);
         public static readonly Type[] TypeArray = { Type };
+        public static readonly Type[] OrdinalParameters = { typeof(int) };
 
         public static readonly MethodInfo IsDBNull = Type.GetMethod(nameof(DbDataReader.IsDBNull));
         public static readonly MethodInfo Read = Type.GetMethod(nameof(DbDataReader.Read));
@@ -27,7 +30,9 @@ namespace DbMap.Deserialization
         private static readonly MethodInfo GetGuid = Type.GetMethod(nameof(DbDataReader.GetGuid));
         private static readonly MethodInfo GetValue = Type.GetMethod(nameof(DbDataReader.GetValue));
 
-        public static MethodInfo GetGetValueMethodFromType(Type sourceType, Type underlyingType)
+        private static MethodInfo[] nonStandardGetMethods = new MethodInfo[] { };
+
+        public static MethodInfo GetGetValueMethodFromType(Type dataReaderType, Type sourceType)
         {
             switch (Type.GetTypeCode(sourceType))
             {
@@ -64,8 +69,19 @@ namespace DbMap.Deserialization
                 case TypeCode.String:
                     return GetString;
 
+                case TypeCode.SByte:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    return ResolveNonStandardGetMethod(dataReaderType, sourceType);
+
                 default:
                     if (ReferenceEquals(sourceType, typeof(byte[])))
+                    {
+                        return GetValue;
+                    }
+
+                    if (ReferenceEquals(sourceType, typeof(char[])))
                     {
                         return GetValue;
                     }
@@ -75,8 +91,37 @@ namespace DbMap.Deserialization
                         return GetGuid;
                     }
 
+                    ThrowException.NotSupported();
                     return null;
             }
+        }
+
+        private static MethodInfo ResolveNonStandardGetMethod(Type dataReaderType, Type sourceType)
+        {
+            var nonStandardGetMethodsCopy = nonStandardGetMethods;
+
+            for (var i = 0; i < nonStandardGetMethodsCopy.Length; i++)
+            {
+                var methodInfo = nonStandardGetMethodsCopy[i];
+                if (ReferenceEquals(methodInfo.ReturnType, sourceType) && ReferenceEquals(methodInfo.DeclaringType, dataReaderType))
+                {
+                    return methodInfo;
+                }
+            }
+
+            var newMethodInfo = dataReaderType.GetMethod("Get" + sourceType.Name, OrdinalParameters);
+            if (newMethodInfo == null)
+            {
+                return null;
+            }
+            
+            var newNonStandardGetMethods = new MethodInfo[nonStandardGetMethodsCopy.Length + 1];
+            Array.Copy(nonStandardGetMethodsCopy, 0, newNonStandardGetMethods, 1, nonStandardGetMethodsCopy.Length);
+            newNonStandardGetMethods[0] = newMethodInfo;
+
+            nonStandardGetMethods = newNonStandardGetMethods;
+
+            return newNonStandardGetMethods[0];
         }
     }
 }

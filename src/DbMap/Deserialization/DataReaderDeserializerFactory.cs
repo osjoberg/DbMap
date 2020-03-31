@@ -13,7 +13,7 @@ namespace DbMap.Deserialization
     {
         private static readonly Type[] DeserializeAllParameters = { DbCommandMetadata.Type, DbDataReaderMetadata.Type };
 
-        internal static DataReaderDeserializer Create(Type type, string[] columnNames, Type[] columnTypes)
+        internal static DataReaderDeserializer Create(Type dataReaderType, Type type, string[] columnNames, Type[] columnTypes)
         {
             var moduleBuilder = DynamicAssembly.GetExistingDynamicAssemblyOrCreateNew(type.Assembly);
 
@@ -93,7 +93,7 @@ namespace DbMap.Deserialization
                 deserializeMethod.SetParameters(DbDataReaderMetadata.TypeArray);
 
                 var il = deserializeMethod.GetILGenerator();
-                EmitDeserializeType(il, type, columnNames, columnTypes);
+                EmitDeserializeType(dataReaderType, il, type, columnNames, columnTypes);
                 il.Emit(OpCodes.Ret);
             }
 
@@ -163,21 +163,23 @@ namespace DbMap.Deserialization
             return (DataReaderDeserializer)Activator.CreateInstance(typeBuilder.CreateTypeInfo());
         }
 
-        private static void EmitDeserializeType(ILGenerator il, Type type, string[] columnNames, Type[] columnTypes)
+        private static void EmitDeserializeType(Type dataReaderType, ILGenerator il, Type type, string[] columnNames, Type[] columnTypes)
         {
             if (columnNames == DbQuery.NoColumnNames)
             {
-                EmitDeserializeClrType(il, columnTypes[0], type);
+                EmitDeserializeClrType(dataReaderType, il, columnTypes[0], type);
             }
             else
             {
-                EmitDeserializeUserType(il, type, columnNames, columnTypes);
+                EmitDeserializeUserType(dataReaderType, il, type, columnNames, columnTypes);
             }
         }
 
-        private static void EmitDeserializeClrType(ILGenerator il, Type sourceType, Type type)
+        private static void EmitDeserializeClrType(Type dataReaderType, ILGenerator il, Type sourceType, Type type)
         {
-            new DataReaderValueDeserializer(sourceType, type, 0).EmitDeserializeClrType(il, false);
+            var getValueMethod = DbDataReaderMetadata.GetGetValueMethodFromType(dataReaderType, sourceType);
+
+            new DataReaderValueDeserializer(getValueMethod, type, 0).EmitDeserializeClrType(il, false);
         }
 
         private static bool PropertyHasRequiredAttribute(PropertyInfo propertyInfo)
@@ -202,7 +204,7 @@ namespace DbMap.Deserialization
             return false;
         }
 
-        private static void EmitDeserializeUserType(ILGenerator il, Type type, string[] columnNames, Type[] columnTypes)
+        private static void EmitDeserializeUserType(Type dataReaderType, ILGenerator il, Type type, string[] columnNames, Type[] columnTypes)
         {
             var constructor = type.GetConstructor(Type.EmptyTypes);
             if (constructor == null)
@@ -222,11 +224,13 @@ namespace DbMap.Deserialization
                     continue;
                 }
 
+                var getValueMethod = DbDataReaderMetadata.GetGetValueMethodFromType(dataReaderType, columnTypes[ordinal]);
+
                 if (propertyInfo.CanWrite && propertyInfo.GetSetMethod() != null)
                 {
                     var propertyIsNullInitialized = propertyInfo.CanRead && propertyInfo.GetValue(sample) == null;
                     var hasRequiredAttribute = PropertyHasRequiredAttribute(propertyInfo);
-                    var dataReaderPropertyValueDeserializer = new DataReaderValueDeserializer(columnTypes[ordinal], propertyInfo, ordinal);
+                    var dataReaderPropertyValueDeserializer = new DataReaderValueDeserializer(getValueMethod, propertyInfo, ordinal);
                     dataReaderPropertyValueDeserializer.EmitDeserializeProperty(il, propertyIsNullInitialized, hasRequiredAttribute);
                     continue;
                 }
@@ -236,7 +240,7 @@ namespace DbMap.Deserialization
                 {
                     var fieldIsNullInitialized = fieldInfo.GetValue(sample) == null;
                     var hasRequiredAttribute = PropertyHasRequiredAttribute(propertyInfo);
-                    var dataReaderFieldValueDeserializer = new DataReaderValueDeserializer(columnTypes[ordinal], fieldInfo, ordinal);
+                    var dataReaderFieldValueDeserializer = new DataReaderValueDeserializer(getValueMethod, fieldInfo, ordinal);
                     dataReaderFieldValueDeserializer.EmitDeserializeProperty(il, fieldIsNullInitialized, hasRequiredAttribute);
                 }
             }

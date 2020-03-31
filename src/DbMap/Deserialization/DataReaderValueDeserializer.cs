@@ -8,7 +8,6 @@ namespace DbMap.Deserialization
 {
     internal class DataReaderValueDeserializer
     {
-        private readonly Type sourceType;
         private readonly Type type;
         private readonly int ordinal;
         private readonly MethodInfo getValueMethod;
@@ -16,23 +15,21 @@ namespace DbMap.Deserialization
         private readonly FieldInfo fieldInfo;
         private readonly PropertyInfo propertyInfo;
 
-        public DataReaderValueDeserializer(Type sourceType, Type type, int ordinal)
+        public DataReaderValueDeserializer(MethodInfo getValueMethod, Type type, int ordinal)
         {
-            this.sourceType = sourceType;
+            this.getValueMethod = getValueMethod;
             this.type = type;
             this.ordinal = ordinal;
 
             nullableInfo = NullableInfo.GetNullable(type);
-
-            getValueMethod = DbDataReaderMetadata.GetGetValueMethodFromType(sourceType, nullableInfo?.UnderlyingType ?? type);
         }
 
-        public DataReaderValueDeserializer(Type sourceType, FieldInfo fieldInfo, int ordinal) : this(sourceType, fieldInfo.FieldType, ordinal)
+        public DataReaderValueDeserializer(MethodInfo getValueMethod, FieldInfo fieldInfo, int ordinal) : this(getValueMethod, fieldInfo.FieldType, ordinal)
         {
             this.fieldInfo = fieldInfo;
         }
 
-        public DataReaderValueDeserializer(Type sourceType, PropertyInfo propertyInfo, int ordinal) : this(sourceType, propertyInfo.PropertyType, ordinal)
+        public DataReaderValueDeserializer(MethodInfo getValueMethod, PropertyInfo propertyInfo, int ordinal) : this(getValueMethod, propertyInfo.PropertyType, ordinal)
         {
             this.propertyInfo = propertyInfo;
         }
@@ -113,7 +110,7 @@ namespace DbMap.Deserialization
 
         private void EmitConversion(ILGenerator il)
         {
-            TypeConverter.EmitConversion(il, sourceType, nullableInfo?.UnderlyingType ?? type);
+            TypeConverter.EmitConversion(il, getValueMethod.ReturnType, nullableInfo?.UnderlyingType ?? type);
         }
 
         private void EmitNull(ILGenerator il)

@@ -11,30 +11,30 @@ namespace DbMap.Deserialization
     {
         private static readonly OpCode[,] ConversionOpCodeTable =
         {
-            /*                                                                                                                   FROM:                                                                                        */
-            /* TO:                Empty  Object DBNull Boolean  Char            SByte  Byte            Int16        UInt16 Int32        UInt32 Int64        UInt64 Single       Double       Decimal DateTime <Undef.> String */
-            /* -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-            /* Empty    = 0  */ { Throw, Throw, Throw, Throw,   Throw,          Throw, Throw,          Throw,       Throw, Throw,       Throw, Throw,       Throw, Throw,       Throw,       Throw,  Throw,   Throw,   Throw }, 
-            /* Object   = 1  */ { Throw, Throw, Throw, Throw,   Throw,          Throw, Throw,          Throw,       Throw, Throw,       Throw, Throw,       Throw, Throw,       Throw,       Throw,  Throw,   Throw,   Throw }, 
-            /* DBNull   = 2  */ { Throw, Throw, Throw, Throw,   Throw,          Throw, Throw,          Throw,       Throw, Throw,       Throw, Throw,       Throw, Throw,       Throw,       Throw,  Throw,   Throw,   Throw },
-            
-            /* Boolean  = 3  */ { Throw, Throw, Throw, Nop,     Cgt_Un,         Throw, Cgt_Un,         Cgt_Un,      Throw, Cgt_Un,      Throw, Conv_I8,     Throw, Ldc_R4,      Ldc_R8,      Call,   Throw,   Throw,   Throw },
-            /* Char     = 4  */ { Throw, Throw, Throw, Conv_U2, Nop,            Throw, Nop,            Conv_Ovf_U2, Throw, Conv_Ovf_U2, Throw, Conv_Ovf_U2, Throw, Conv_Ovf_U2, Conv_Ovf_U2, Call,   Throw,   Throw,   Throw },  
-            /* SByte    = 5  */ { Throw, Throw, Throw, Conv_I1, Conv_Ovf_I1_Un, Throw, Conv_Ovf_I1_Un, Conv_Ovf_I1, Throw, Conv_Ovf_I1, Throw, Conv_Ovf_I1, Throw, Conv_Ovf_I1, Conv_Ovf_I1, Call,   Throw,   Throw,   Throw },  
-            /* Byte     = 6  */ { Throw, Throw, Throw, Conv_U1, Conv_Ovf_U1_Un, Throw, Nop,            Conv_Ovf_U1, Throw, Conv_Ovf_U1, Throw, Conv_Ovf_U1, Throw, Conv_Ovf_U1, Conv_Ovf_U1, Call,   Throw,   Throw,   Throw },  
-            /* Int16    = 7  */ { Throw, Throw, Throw, Conv_I2, Conv_Ovf_I2_Un, Throw, Nop,            Nop,         Throw, Conv_Ovf_I2, Throw, Conv_Ovf_I2, Throw, Conv_Ovf_I2, Conv_Ovf_I2, Call,   Throw,   Throw,   Throw },  
-            /* UInt16   = 8  */ { Throw, Throw, Throw, Conv_U2, Nop,            Throw, Nop,            Conv_Ovf_U2, Throw, Conv_Ovf_U2, Throw, Conv_Ovf_U2, Throw, Conv_Ovf_U2, Conv_Ovf_U2, Call,   Throw,   Throw,   Throw },  
-            /* Int32    = 9  */ { Throw, Throw, Throw, Nop,     Nop,            Throw, Nop,            Nop,         Throw, Nop,         Throw, Conv_Ovf_I4, Throw, Conv_Ovf_I4, Conv_Ovf_I4, Call,   Throw,   Throw,   Throw },  
-            /* UInt32   = 10 */ { Throw, Throw, Throw, Conv_U4, Nop,            Throw, Nop,            Conv_Ovf_U4, Throw, Conv_Ovf_U4, Throw, Conv_Ovf_U4, Throw, Conv_Ovf_U4, Conv_Ovf_U4, Call,   Throw,   Throw,   Throw },  
-            /* Int64    = 11 */ { Throw, Throw, Throw, Conv_I8, Conv_U8,        Throw, Conv_U8,        Conv_I8,     Throw, Conv_I8,     Throw, Nop,         Throw, Conv_Ovf_I8, Conv_Ovf_I8, Call,   Throw,   Throw,   Throw },  
-            /* UInt64   = 12 */ { Throw, Throw, Throw, Conv_U8, Conv_U8,        Throw, Conv_U8,        Conv_Ovf_U8, Throw, Conv_Ovf_U8, Throw, Conv_Ovf_U8, Throw, Conv_Ovf_U8, Conv_Ovf_U8, Call,   Throw,   Throw,   Throw },  
-            /* Single   = 13 */ { Throw, Throw, Throw, Conv_R4, Conv_R4,        Throw, Conv_R4,        Conv_R4,     Throw, Conv_R4,     Throw, Conv_R4,     Throw, Nop,         Conv_R4,     Call,   Throw,   Throw,   Throw },  
-            /* Double   = 14 */ { Throw, Throw, Throw, Conv_R8, Conv_R8,        Throw, Conv_R8,        Conv_R8,     Throw, Conv_R8,     Throw, Conv_R8,     Throw, Conv_R8,     Nop,         Call,   Throw,   Throw,   Throw },
-            /* Decimal  = 15 */ { Throw, Throw, Throw, Call,    Call,           Throw, Call,           Call,        Throw, Call,        Throw, Call,        Throw, Call,        Call,        Nop,    Throw,   Throw,   Throw }, 
-
-            /* DateTime = 16 */ { Throw, Throw, Throw, Throw,  Throw,           Throw, Throw,          Throw,       Throw, Throw,       Throw, Throw,       Throw, Throw,       Throw,       Throw,  Nop,     Throw,   Throw }, 
-            /* <Undef.> = 17 */ { Throw, Throw, Throw, Throw,  Throw,           Throw, Throw,          Throw,       Throw, Throw,       Throw, Throw,       Throw, Throw,       Throw,       Throw,  Throw,   Throw,   Throw },  
-            /* String   = 18 */ { Throw, Throw, Throw, Throw,  Throw,           Throw, Throw,          Throw,       Throw, Throw,       Throw, Throw,       Throw, Throw,       Throw,       Throw,  Throw,   Throw,   Nop }
+            /*                                                                                                                     FROM:                                                                                                                       */
+            /* TO:                Empty  Object DBNull Boolean  Char            SByte        Byte            Int16        UInt16          Int32        UInt32          Int64        UInt64          Single       Double       Decimal DateTime <Undef.> String */
+            /* ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+            /* Empty    = 0  */ { Throw, Throw, Throw, Throw,   Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,       Throw,  Throw,   Throw,   Throw }, 
+            /* Object   = 1  */ { Throw, Throw, Throw, Throw,   Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,       Throw,  Throw,   Throw,   Throw }, 
+            /* DBNull   = 2  */ { Throw, Throw, Throw, Throw,   Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,       Throw,  Throw,   Throw,   Throw },
+                                                                                                                                                                                                    
+            /* Boolean  = 3  */ { Throw, Throw, Throw, Nop,     Cgt_Un,         Cgt_Un,      Cgt_Un,         Cgt_Un,      Cgt_Un,         Cgt_Un,      Cgt_Un,         Conv_I8,     Conv_I8,        Ldc_R4,      Ldc_R8,      Call,   Throw,   Throw,   Throw },
+            /* Char     = 4  */ { Throw, Throw, Throw, Conv_U2, Nop,            Conv_Ovf_U2, Nop,            Conv_Ovf_U2, Nop,            Conv_Ovf_U2, Conv_Ovf_U2_Un, Conv_Ovf_U2, Conv_Ovf_U2_Un, Conv_Ovf_U2, Conv_Ovf_U2, Call,   Throw,   Throw,   Throw },  
+            /* SByte    = 5  */ { Throw, Throw, Throw, Conv_I1, Conv_Ovf_I1_Un, Nop,         Conv_Ovf_I1_Un, Conv_Ovf_I1, Conv_Ovf_I1_Un, Conv_Ovf_I1, Conv_Ovf_I1_Un, Conv_Ovf_I1, Conv_Ovf_I1_Un, Conv_Ovf_I1, Conv_Ovf_I1, Call,   Throw,   Throw,   Throw },  
+            /* Byte     = 6  */ { Throw, Throw, Throw, Conv_U1, Conv_Ovf_U1_Un, Conv_Ovf_U1, Nop,            Conv_Ovf_U1, Conv_Ovf_U1_Un, Conv_Ovf_U1, Conv_Ovf_U1_Un, Conv_Ovf_U1, Conv_Ovf_U1_Un, Conv_Ovf_U1, Conv_Ovf_U1, Call,   Throw,   Throw,   Throw },  
+            /* Int16    = 7  */ { Throw, Throw, Throw, Conv_I2, Conv_Ovf_I2_Un, Nop,         Nop,            Nop,         Conv_Ovf_U1_Un, Conv_Ovf_I2, Conv_Ovf_U1_Un, Conv_Ovf_I2, Conv_Ovf_U1_Un, Conv_Ovf_I2, Conv_Ovf_I2, Call,   Throw,   Throw,   Throw },  
+            /* UInt16   = 8  */ { Throw, Throw, Throw, Conv_U2, Nop,            Conv_Ovf_U2, Nop,            Conv_Ovf_U2, Nop,            Conv_Ovf_U2, Conv_Ovf_U1_Un, Conv_Ovf_U2, Conv_Ovf_U1_Un, Conv_Ovf_U2, Conv_Ovf_U2, Call,   Throw,   Throw,   Throw },  
+            /* Int32    = 9  */ { Throw, Throw, Throw, Nop,     Nop,            Nop,         Nop,            Nop,         Nop,            Nop,         Conv_Ovf_I4_Un, Conv_Ovf_I4, Conv_Ovf_I4_Un, Conv_Ovf_I4, Conv_Ovf_I4, Call,   Throw,   Throw,   Throw },  
+            /* UInt32   = 10 */ { Throw, Throw, Throw, Conv_U4, Nop,            Conv_Ovf_U4, Nop,            Conv_Ovf_U4, Nop,            Conv_Ovf_U4, Nop,            Conv_Ovf_U4, Conv_Ovf_U4_Un, Conv_Ovf_U4, Conv_Ovf_U4, Call,   Throw,   Throw,   Throw },  
+            /* Int64    = 11 */ { Throw, Throw, Throw, Conv_I8, Conv_U8,        Conv_I8,     Conv_U8,        Conv_I8,     Conv_U8,        Conv_I8,     Conv_U8,        Nop,         Conv_Ovf_I8_Un, Conv_Ovf_I8, Conv_Ovf_I8, Call,   Throw,   Throw,   Throw },  
+            /* UInt64   = 12 */ { Throw, Throw, Throw, Conv_U8, Conv_U8,        Conv_Ovf_U8, Conv_U8,        Conv_Ovf_U8, Conv_U8,        Conv_Ovf_U8, Conv_U8,        Conv_Ovf_U8, Nop,            Conv_Ovf_U8, Conv_Ovf_U8, Call,   Throw,   Throw,   Throw },  
+            /* Single   = 13 */ { Throw, Throw, Throw, Conv_R4, Conv_R4,        Conv_R4,     Conv_R4,        Conv_R4,     Conv_R4,        Conv_R4,     Conv_R4,        Conv_R4,     Conv_R4,        Nop,         Conv_R4,     Call,   Throw,   Throw,   Throw },  
+            /* Double   = 14 */ { Throw, Throw, Throw, Conv_R8, Conv_R8,        Conv_R8,     Conv_R8,        Conv_R8,     Conv_R8,        Conv_R8,     Conv_R8,        Conv_R8,     Conv_R8,        Conv_R8,     Nop,         Call,   Throw,   Throw,   Throw },
+            /* Decimal  = 15 */ { Throw, Throw, Throw, Call,    Call,           Call,        Call,           Call,        Call,           Call,        Call,           Call,        Call,           Call,        Call,        Nop,    Throw,   Throw,   Throw }, 
+                                                                                                                                                                                                   
+            /* DateTime = 16 */ { Throw, Throw, Throw, Throw,  Throw,           Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,       Throw,  Nop,     Throw,   Throw }, 
+            /* <Undef.> = 17 */ { Throw, Throw, Throw, Throw,  Throw,           Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,       Throw,  Throw,   Throw,   Throw },  
+            /* String   = 18 */ { Throw, Throw, Throw, Throw,  Throw,           Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,          Throw,       Throw,       Throw,  Throw,   Throw,   Nop }
         };
 
         public static void EmitConversion(ILGenerator il, Type from, Type to)
@@ -64,13 +64,13 @@ namespace DbMap.Deserialization
                 }
 
                 // byte[] cannot be resolved from ConversionOpCodeTable.
-                if (ReferenceEquals(from, typeof(byte[])) && ReferenceEquals(to, typeof(byte[])))
+                if (ReferenceEquals(from, typeof(object)) && ReferenceEquals(to, typeof(byte[])))
                 {
                     return;
                 }
 
                 // char[] cannot be resolved from ConversionOpCodeTable.
-                if (ReferenceEquals(from, typeof(char[])) && ReferenceEquals(to, typeof(char[])))
+                if (ReferenceEquals(from, typeof(object)) && ReferenceEquals(to, typeof(char[])))
                 {
                     return;
                 }
@@ -100,6 +100,11 @@ namespace DbMap.Deserialization
             {
                 il.Emit(OpCodes.Call, DecimalMetadata.GetConversionMethodToDecimal(fromTypeCode));
                 return;
+            }
+
+            if ((fromTypeCode == TypeCode.UInt32 || fromTypeCode == TypeCode.UInt64) && (toTypeCode == TypeCode.Single || toTypeCode == TypeCode.Double))
+            {
+                il.Emit(OpCodes.Conv_R_Un);
             }
 
             il.Emit(conversionOpCode);

@@ -189,7 +189,7 @@ namespace DbMap
             returnType = type;
             var columnNames = DbQueryInternal.IsClrType(type) ? NoColumnNames : DbQueryInternal.GetColumnNames(reader);
             var columnTypes = DbQueryInternal.GetColumnTypes(reader);
-            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(type, columnNames, columnTypes);
+            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(reader.GetType(), type, columnNames, columnTypes);
         }
 
         private IDbCommand SetupCommand(IDbConnection connection, object parameters, IDbTransaction transaction)
