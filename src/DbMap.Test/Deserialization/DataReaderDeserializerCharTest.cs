@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Globalization;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace DbMap.Test.Deserialization
 {
     [TestClass]
-    public class DataReaderDeserializerCharTest : DataReaderDeserializerNumberTestBase<char>
+    public class DataReaderDeserializerCharTest : DataReaderDeserializerTestBase<char>
     { 
         public DataReaderDeserializerCharTest() : base("SELECT CAST(IIF('{0}' = 'NULL', NULL, '{0}') AS NVARCHAR)", char.MinValue, char.MaxValue)
         {
@@ -59,110 +58,6 @@ namespace DbMap.Test.Deserialization
         public override void CanDeserializeNullableNullValue()
         {
             base.CanDeserializeNullableNullValue();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToSByte()
-        {
-            base.CanDeserializeValueToSByte();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToByte()
-        {
-            base.CanDeserializeValueToByte();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToChar()
-        {
-            base.CanDeserializeValueToChar();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToInt16()
-        {
-            base.CanDeserializeValueToInt16();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToUInt16()
-        {
-            base.CanDeserializeValueToUInt16();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToInt32()
-        {
-            base.CanDeserializeValueToInt32();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToUInt32()
-        {
-            base.CanDeserializeValueToUInt32();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToInt64()
-        {
-            base.CanDeserializeValueToInt64();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToUInt64()
-        {
-            base.CanDeserializeValueToUInt64();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToSingle()
-        {
-            base.CanDeserializeValueToSingle();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToDouble()
-        {
-            base.CanDeserializeValueToDouble();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeValueToDecimal()
-        {
-            base.CanDeserializeValueToDecimal();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeZeroValueToFalseBoolean()
-        {
-            base.CanDeserializeZeroValueToFalseBoolean();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeNonZeroValueToTrueBoolean()
-        {
-            base.CanDeserializeNonZeroValueToTrueBoolean();
-        }
-
-        [TestMethod]
-        public override void CanDeserializeValueToObject()
-        {
-            // Not really supported as there is no way to specify the char/string type and at the same time specify object.
         }
     }
 }

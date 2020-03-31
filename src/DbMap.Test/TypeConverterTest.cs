@@ -29,16 +29,23 @@ namespace DbMap.Test
 
         [TestMethod]
         [DynamicData(nameof(GetNumericTypes), DynamicDataSourceType.Method)]
-        public void CanBooleanFalseToZero(Type to)
+        public void CanConvertBooleanFalseToZero(Type to)
         {
             InternalCanConvertValue(typeof(bool), to, false, ChangeType(0, to));
         }
 
         [TestMethod]
         [DynamicData(nameof(GetNumericTypes), DynamicDataSourceType.Method)]
-        public void CanBooleanTrueToOne(Type to)
+        public void CanConvertBooleanTrueToOne(Type to)
         {
             InternalCanConvertValue(typeof(bool), to, true, ChangeType(1, to));
+        }
+
+        [TestMethod]
+        [DynamicData(nameof(GetNumericTypes), DynamicDataSourceType.Method)]
+        public void CanConvertToObject(Type from)
+        {
+            InternalCanConvertValue(from, typeof(object), ChangeType(127, from), ChangeType(127, from));
         }
 
         [TestMethod]
@@ -114,6 +121,7 @@ namespace DbMap.Test
             var conversionMethod = BuildConversionMethod(from, to);
 
             var actual = conversionMethod.Invoke(null, new[] { fromValue });
+
             Assert.AreEqual(toValue, actual); 
         }
 
