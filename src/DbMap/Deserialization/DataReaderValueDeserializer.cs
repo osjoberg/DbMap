@@ -105,12 +105,22 @@ namespace DbMap.Deserialization
 
         private void EmitGetValue(ILGenerator il)
         {
-            EmitInvoke(il, getValueMethod, ordinal);
+            if (getValueMethod != null)
+            {
+                EmitInvoke(il, getValueMethod, ordinal);
+            }
+            else
+            {
+                il.Emit(OpCodes.Callvirt, typeof(ThrowException).GetMethod(nameof(ThrowException.NotSupported)));
+            }
         }
 
         private void EmitConversion(ILGenerator il)
         {
-            TypeConverter.EmitConversion(il, getValueMethod.ReturnType, nullableInfo?.UnderlyingType ?? type);
+            if (getValueMethod != null)
+            {
+                TypeConverter.EmitConversion(il, getValueMethod.ReturnType, nullableInfo?.UnderlyingType ?? type);
+            }
         }
 
         private void EmitNull(ILGenerator il)

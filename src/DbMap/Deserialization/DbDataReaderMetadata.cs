@@ -2,8 +2,6 @@
 using System.Data.Common;
 using System.Reflection;
 
-using DbMap.Infrastructure;
-
 namespace DbMap.Deserialization
 {
     internal static class DbDataReaderMetadata
@@ -91,7 +89,6 @@ namespace DbMap.Deserialization
                         return GetGuid;
                     }
 
-                    ThrowException.NotSupported();
                     return null;
             }
         }
