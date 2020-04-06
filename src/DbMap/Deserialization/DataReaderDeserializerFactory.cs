@@ -189,15 +189,12 @@ namespace DbMap.Deserialization
                 return false;
             }
 
-            using (var customAttributes = propertyInfo.GetCustomAttributes().GetEnumerator())
+            foreach (var customAttributes in propertyInfo.GetCustomAttributes())
             {
-                while (customAttributes.MoveNext())
+                var type = customAttributes.GetType();
+                if (type.Namespace == "System.ComponentModel.DataAnnotations" && type.Name == "RequiredAttribute")
                 {
-                    var type = customAttributes.Current.GetType();
-                    if (type.Namespace == "System.ComponentModel.DataAnnotations" && type.Name == "RequiredAttribute")
-                    {
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -213,9 +210,9 @@ namespace DbMap.Deserialization
             }
 
             var sample = Activator.CreateInstance(type);
-
             il.Emit(OpCodes.Newobj, constructor);
 
+            var uniqueNames = new HashSet<string>();
             for (var ordinal = 0; ordinal < columnNames.Length; ordinal++)
             {
                 var propertyInfo = type.GetProperty(columnNames[ordinal], BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
@@ -232,6 +229,12 @@ namespace DbMap.Deserialization
                     var hasRequiredAttribute = PropertyHasRequiredAttribute(propertyInfo);
                     var dataReaderPropertyValueDeserializer = new DataReaderValueDeserializer(getValueMethod, propertyInfo, ordinal);
                     dataReaderPropertyValueDeserializer.EmitDeserializeProperty(il, propertyIsNullInitialized, hasRequiredAttribute);
+
+                    if (uniqueNames.Add(propertyInfo.Name) == false)
+                    {
+                        ThrowException.DuplicateFieldNames(propertyInfo.Name);
+                    }
+
                     continue;
                 }
 
@@ -242,6 +245,11 @@ namespace DbMap.Deserialization
                     var hasRequiredAttribute = PropertyHasRequiredAttribute(propertyInfo);
                     var dataReaderFieldValueDeserializer = new DataReaderValueDeserializer(getValueMethod, fieldInfo, ordinal);
                     dataReaderFieldValueDeserializer.EmitDeserializeProperty(il, fieldIsNullInitialized, hasRequiredAttribute);
+
+                    if (uniqueNames.Add(propertyInfo.Name) == false)
+                    {
+                        ThrowException.DuplicateFieldNames(propertyInfo.Name);
+                    }
                 }
             }
         }

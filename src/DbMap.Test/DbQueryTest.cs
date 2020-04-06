@@ -108,5 +108,18 @@ namespace DbMap.Test
             var query = new DbQuery("SELECT @parameter1 AS [Column] UNION SELECT @parameter2 AS [Column] ");
             DbAssert.AreEqual(1, connection => query.QuerySingleOrDefault<int>(connection, new { parameter1 = 1, parameter2 = 2 }));
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidOperationException), "Field name 'Column' is not unique which is required to be able to materialize type.")]
+        public void ExecuteQuerySingleOrDefaultThrowsOnDuplicateColumnNames()
+        {
+            var query = new DbQuery("SELECT 1 AS [Column], 2 AS [Column]");
+            DbAssert.AreEqual(1, connection => query.QueryFirst<UserType>(connection));
+        }
+
+        internal class UserType
+        {
+            public int Column { get; set; }
+        }
     }
 }

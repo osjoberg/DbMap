@@ -24,6 +24,11 @@ namespace DbMap.Infrastructure
             throw new InvalidOperationException("A default, parameterless constructor is required to be able to materialize type.");
         }
 
+        public static void DuplicateFieldNames(string fieldName)
+        {
+            throw new InvalidOperationException($"Field name '{fieldName}' is not unique which is required to be able to materialize type.");
+        }
+
         public static void NotSupported()
         {
             throw new NotSupportedException();
