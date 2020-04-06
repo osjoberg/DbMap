@@ -88,6 +88,27 @@ namespace DbMap
         }
 
         /// <summary>
+        /// Execute query and return all elements in the result.
+        /// </summary>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="parameters">Query parameters.</param>
+        /// <param name="transaction">Transaction to use.</param>
+        /// <returns>All elements in the result.</returns>
+        public IEnumerable<dynamic> Query(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        {
+            if (connection == null)
+            {
+                ThrowException.ValueCannotBeNull(nameof(connection));
+            }
+
+            var command = (DbCommand)SetupCommand(connection, parameters, transaction);
+            var reader = command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess);
+            SetupDataReaderDeserializer(reader);
+
+            return dataReaderDeserializer.DeserializeAll<dynamic>(command, reader);
+        }
+
+        /// <summary>
         /// Execute query and return the first element in the result.
         /// </summary>
         /// <typeparam name="TReturn">Type of value.</typeparam>
@@ -107,6 +128,28 @@ namespace DbMap
             {
                 SetupDataReaderDeserializer(typeof(TReturn), reader);
                 return DbQueryInternal.QueryFirst<TReturn>(reader, dataReaderDeserializer);
+            }
+        }
+
+        /// <summary>
+        /// Execute query and return the first element in the result.
+        /// </summary>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="parameters">Query parameters.</param>
+        /// <param name="transaction">Transaction to use.</param>
+        /// <returns>First element in the result.</returns>
+        public dynamic QueryFirst(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        {
+            if (connection == null)
+            {
+                ThrowException.ValueCannotBeNull(nameof(connection));
+            }
+
+            using (var command = SetupCommand(connection, parameters, transaction))
+            using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess | CommandBehavior.SingleRow))
+            {
+                SetupDataReaderDeserializer(reader);
+                return DbQueryInternal.QueryFirst<dynamic>(reader, dataReaderDeserializer);
             }
         }
 
@@ -134,6 +177,28 @@ namespace DbMap
         }
 
         /// <summary>
+        /// Execute query and return the first element in the result or a default value if the result is empty.
+        /// </summary>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="parameters">Query parameters.</param>
+        /// <param name="transaction">Transaction to use.</param>
+        /// <returns>First element in the result or the default value.</returns>
+        public dynamic QueryFirstOrDefault(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        {
+            if (connection == null)
+            {
+                ThrowException.ValueCannotBeNull(nameof(connection));
+            }
+
+            using (var command = SetupCommand(connection, parameters, transaction))
+            using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess | CommandBehavior.SingleRow))
+            {
+                SetupDataReaderDeserializer(reader);
+                return DbQueryInternal.QueryFirstOrDefault<dynamic>(reader, dataReaderDeserializer);
+            }
+        }
+
+        /// <summary>
         /// Execute query and return the only element in the result, and throws an exception if there is not exactly one element in the result.
         /// </summary>
         /// <typeparam name="TReturn">Type of value.</typeparam>
@@ -153,6 +218,28 @@ namespace DbMap
             {
                 SetupDataReaderDeserializer(typeof(TReturn), reader);
                 return DbQueryInternal.QuerySingle<TReturn>(reader, dataReaderDeserializer);
+            }
+        }
+
+        /// <summary>
+        /// Execute query and return the only element in the result, and throws an exception if there is not exactly one element in the result.
+        /// </summary>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="parameters">Query parameters.</param>
+        /// <param name="transaction">Transaction to use.</param>
+        /// <returns>Single element in the result.</returns>
+        public dynamic QuerySingle(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        {
+            if (connection == null)
+            {
+                ThrowException.ValueCannotBeNull(nameof(connection));
+            }
+
+            using (var command = SetupCommand(connection, parameters, transaction))
+            using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess))
+            {
+                SetupDataReaderDeserializer(reader);
+                return DbQueryInternal.QuerySingle<dynamic>(reader, dataReaderDeserializer);
             }
         }
 
@@ -179,6 +266,28 @@ namespace DbMap
             }
         }
 
+        /// <summary>
+        /// Execute query and return the only element in the result, or a default element if the result is empty; this method throws an exception if there is not exactly one element in the result.
+        /// </summary>
+        /// <param name="connection">Database connection.</param>
+        /// <param name="parameters">Query parameters.</param>
+        /// <param name="transaction">Transaction to use.</param>
+        /// <returns>Single element in the result or the default value.</returns>
+        public dynamic QuerySingleOrDefault(IDbConnection connection, object parameters = null, IDbTransaction transaction = null)
+        {
+            if (connection == null)
+            {
+                ThrowException.ValueCannotBeNull(nameof(connection));
+            }
+
+            using (var command = SetupCommand(connection, parameters, transaction))
+            using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess))
+            {
+                SetupDataReaderDeserializer(reader);
+                return DbQueryInternal.QuerySingleOrDefault<dynamic>(reader, dataReaderDeserializer);
+            }
+        }
+
         private void SetupDataReaderDeserializer(Type type, DbDataReader reader)
         {
             if (ReferenceEquals(type, returnType)) 
@@ -186,10 +295,25 @@ namespace DbMap
                 return;
             }
 
-            returnType = type;
             var columnNames = DbQueryInternal.IsClrType(type) ? NoColumnNames : DbQueryInternal.GetColumnNames(reader);
             var columnTypes = DbQueryInternal.GetColumnTypes(reader);
             dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(reader.GetType(), type, columnNames, columnTypes);
+            returnType = type;
+        }
+
+        private void SetupDataReaderDeserializer(DbDataReader reader)
+        {
+            if (returnType != null)
+            {
+                return;
+            }
+
+            var columnNames = DbQueryInternal.GetColumnNames(reader);
+            var columnTypes = DbQueryInternal.GetColumnTypes(reader);
+
+            returnType = DynamicTypeCache.GetCachedOrBuildNew(columnNames, columnTypes);
+
+            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(reader.GetType(), returnType, columnNames, columnTypes);
         }
 
         private IDbCommand SetupCommand(IDbConnection connection, object parameters, IDbTransaction transaction)

@@ -21,6 +21,13 @@ namespace DbMap.Test
             Assert.AreEqual(expected, func(sqlConnection));
         }
 
+        public static void AreEqual(dynamic expected, Func<DbConnection, dynamic> func)
+        {
+            using var sqlConnection = new SqlConnection(ConnectionString);
+
+            ObjectAreEqual(expected, func(sqlConnection));
+        }
+
         public static void AreEqual<TReturn>(TReturn expected, string query, bool isClrType = true)
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
@@ -40,7 +47,7 @@ namespace DbMap.Test
             Assert.AreEqual(expected, actualUserType);
         }
 
-        public static void AreEqual<TReturn>(TReturn? expected, string sql) where TReturn: struct
+        public static void AreEqual<TReturn>(TReturn? expected, string sql) where TReturn : struct
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
 
@@ -80,11 +87,52 @@ namespace DbMap.Test
             CollectionAssert.AreEqual(expectedArray, actualArray);
         }
 
+        public static void CollectionAreEqual(IEnumerable<dynamic> expected, string sql)
+        {
+            using var sqlConnection = new SqlConnection(ConnectionString);
+
+            var actualQuery = new DbQuery(sql).Query(sqlConnection);
+
+            var expectedArray = expected.ToArray();
+            var actualArray = actualQuery.ToArray();
+
+            CollectionAssert.AreEqual(expectedArray, actualArray);
+        }
+
         public static void IsTrue(string sql, object parameters)
         {
             using var sqlConnection = new SqlConnection(ConnectionString);
 
             Assert.IsTrue(new DbQuery(sql).QuerySingle<bool>(sqlConnection, parameters));
+        }
+
+        private static void ObjectAreEqual(object expected, object actual)
+        {
+            if (expected == null && actual == null)
+            {
+                return;
+            }
+
+            if (expected == null || actual == null)
+            {
+                Assert.AreEqual(expected, actual);
+            }
+
+            var expectedProperties = expected.GetType().GetProperties();
+            var actualProperties = actual.GetType().GetProperties();
+
+            Assert.AreEqual(expectedProperties.Length, actualProperties.Length);
+
+            foreach (var expectedProperty in expectedProperties)
+            {
+                var actualProperty = actualProperties.SingleOrDefault(property => property.Name == expectedProperty.Name);
+                Assert.IsNotNull(actualProperty);
+
+                var expectedPropertyValue = expectedProperty.GetValue(expected);
+                var actualPropertyValue = actualProperty.GetValue(actual);
+
+                Assert.AreEqual(expectedPropertyValue, actualPropertyValue, expectedProperty.Name);
+            }
         }
 
         private class UserType<TReturn>

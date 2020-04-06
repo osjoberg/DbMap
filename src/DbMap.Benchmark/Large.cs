@@ -86,17 +86,63 @@ namespace DbMap.Benchmark
 
         public override bool Equals(object obj)
         {
-            return this.Equals((Large)obj);
+            if (obj is Large large)
+            {
+                return
+                    Boolean == large.Boolean &&
+                    Byte == large.Byte &&
+                    DateTime.Equals(large.DateTime) &&
+                    Decimal == large.Decimal &&
+                    Double == large.Double &&
+                    Guid == large.Guid &&
+                    Int16 == large.Int16 &&
+                    Int32 == large.Int32 &&
+                    Int64 == large.Int64 &&
+                    Single == large.Single &&
+                    String == large.String &&
+                    NullableBoolean == large.NullableBoolean &&
+                    NullableByte == large.NullableByte &&
+                    NullableDateTime == large.NullableDateTime &&
+                    NullableDecimal == large.NullableDecimal &&
+                    NullableDouble == large.NullableDouble &&
+                    NullableGuid == large.NullableGuid &&
+                    NullableInt16 == large.NullableInt16 &&
+                    NullableInt32 == large.NullableInt32 &&
+                    NullableInt64 == large.NullableInt64 &&
+                    NullableSingle == large.NullableSingle &&
+                    NullableString == large.NullableString;
+            }
+
+            var dynamic = (dynamic)obj;
+
+            return
+                Boolean == (bool)dynamic.Boolean &&
+                Byte == (byte)dynamic.Byte &&
+                DateTime == (DateTime)dynamic.DateTime &&
+                Decimal == (decimal)dynamic.Decimal &&
+                Double == (double)dynamic.Double &&
+                Guid == (Guid)dynamic.Guid &&
+                Int16 == (short)dynamic.Int16 &&
+                Int32 == (int)dynamic.Int32 &&
+                Int64 == (long)dynamic.Int64 &&
+                Single == (float)dynamic.Single &&
+                String == (string)dynamic.String &&
+                NullableBoolean == (bool?)dynamic.NullableBoolean &&
+                NullableByte == (byte?)dynamic.NullableByte &&
+                NullableDateTime == (DateTime?)dynamic.NullableDateTime &&
+                NullableDecimal == (decimal?)dynamic.NullableDecimal &&
+                NullableDouble == (double?)dynamic.NullableDouble &&
+                NullableGuid == (Guid?)dynamic.NullableGuid &&
+                NullableInt16 == (short?)dynamic.NullableInt16 &&
+                NullableInt32 == (int?)dynamic.NullableInt32 &&
+                NullableInt64 == (long?)dynamic.NullableInt64 &&
+                NullableSingle == (float?)dynamic.NullableSingle &&
+                NullableString == (string)dynamic.NullableString;
         }
 
         public override int GetHashCode()
         {
             throw new NotImplementedException();
-        }
-
-        protected bool Equals(Large other)
-        {
-            return Boolean == other.Boolean && Byte == other.Byte && DateTime.Equals(other.DateTime) && Decimal == other.Decimal && Double.Equals(other.Double) && Guid.Equals(other.Guid) && Int16 == other.Int16 && Int32 == other.Int32 && Int64 == other.Int64 && Single.Equals(other.Single) && String == other.String && NullableBoolean == other.NullableBoolean && NullableByte == other.NullableByte && Nullable.Equals(NullableDateTime, other.NullableDateTime) && NullableDecimal == other.NullableDecimal && Nullable.Equals(NullableDouble, other.NullableDouble) && Nullable.Equals(NullableGuid, other.NullableGuid) && NullableInt16 == other.NullableInt16 && NullableInt32 == other.NullableInt32 && NullableInt64 == other.NullableInt64 && Nullable.Equals(NullableSingle, other.NullableSingle) && NullableString == other.NullableString;
         }
     }
 }
