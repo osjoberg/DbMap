@@ -15,7 +15,7 @@ using RepoDb;
 
 namespace DbMap.Benchmark.BenchmarkSuite
 {
-    [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 1000)]
+    [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 500)]
     public class LargeBenchmark
     {
         private static readonly int p1 = 1;
