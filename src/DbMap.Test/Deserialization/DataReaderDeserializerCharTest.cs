@@ -52,12 +52,5 @@ namespace DbMap.Test.Deserialization
         {
             base.CanDeserializeNullableMinValue();
         }
-
-        [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
-        public override void CanDeserializeNullableNullValue()
-        {
-            base.CanDeserializeNullableNullValue();
-        }
     }
 }

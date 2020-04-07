@@ -8,7 +8,6 @@ namespace DbMap.Test.Deserialization
     public class DataReaderDeserializerCharArrayTest
     {
         [TestMethod]
-        [ExpectedException(typeof(InvalidCastException))]
         public void CanDeserializeNullCharArray()
         {
             DbAssert.ArrayAreEqual<char[]>(null, "SELECT CAST(NULL AS NVARCHAR(10))");

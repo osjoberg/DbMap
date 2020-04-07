@@ -34,9 +34,9 @@ namespace DbMap.Infrastructure
             throw new NotSupportedException();
         }
 
-        public static void InvalidCast(Type from, Type to)
+        public static string InvalidCast(Type from, Type to)
         {
-            throw new InvalidCastException($"Invalid cast from '{from.Name}' to '{to.Name}'.");
+            return $"Invalid cast from '{from.Name}' to '{to.Name}'.";
         }
     }
 }

@@ -39,7 +39,7 @@ namespace DbMap.Deserialization
 
         public static void EmitConversion(ILGenerator il, Type from, Type to)
         {
-            if (ReferenceEquals(to, typeof(object)))
+            if (from.IsClass == false && ReferenceEquals(to, typeof(object)))
             {
                 il.Emit(OpCodes.Box, from);
                 return;
@@ -75,7 +75,9 @@ namespace DbMap.Deserialization
                     return;
                 }
 
-                ThrowException.InvalidCast(from, to);
+                il.Emit(OpCodes.Ldstr, ThrowException.InvalidCast(from, to));
+                il.Emit(OpCodes.Newobj, typeof(InvalidCastException).GetConstructor(Type.EmptyTypes));
+                il.Emit(OpCodes.Throw);
             }
 
             if (fromTypeCode == TypeCode.Boolean)
