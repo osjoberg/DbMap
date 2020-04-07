@@ -17,7 +17,7 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class TinyBenchmark
     {
-        private static readonly Func<DbMapDbContext, int, string> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1) => context.Tiny.Where(tiny => p1 == 1).Select(tiny => tiny.String).AsNoTracking().First());
+        private static readonly Func<DbMapDbContext, int, string> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1) => context.Tiny.Where(tiny => p1 == 1).Select(tiny => tiny.String).First());
 
         private static readonly int p1 = 1;
 
@@ -67,19 +67,19 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark]
         public string EFCoreLinqTiny()
         {
-            return context.Tiny.Where(tiny => p1 == 1).Select(tiny => tiny.String).AsNoTracking().First();
+            return context.Tiny.Where(tiny => p1 == 1).Select(tiny => tiny.String).First();
         }
 
         [Benchmark]
         public string EFCoreInterpolatedTiny()
         {
-            return context.Tiny.FromSqlInterpolated(SqlEFInterpolated).Select(tiny => tiny.String).AsNoTracking().First();
+            return context.Tiny.FromSqlInterpolated(SqlEFInterpolated).Select(tiny => tiny.String).First();
         }
 
         [Benchmark]
         public string EFCoreRawTiny()
         {
-            return context.Tiny.FromSqlRaw(SqlEFRaw, ParametersArray).Select(tiny => tiny.String).AsNoTracking().First();
+            return context.Tiny.FromSqlRaw(SqlEFRaw, ParametersArray).Select(tiny => tiny.String).First();
         }
 
         [Benchmark]

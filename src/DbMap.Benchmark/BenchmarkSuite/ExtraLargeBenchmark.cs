@@ -68,19 +68,19 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark]
         public List<ExtraLarge> EFCoreLinqExtraLarge()
         {
-            return context.ExtraLarge.Where(extraLarge => p1 != p2 || p3 != p4 || p5 != p6 || p7 != p8 || p9 != p10).AsNoTracking().ToList();
+            return context.ExtraLarge.Where(extraLarge => p1 != p2 || p3 != p4 || p5 != p6 || p7 != p8 || p9 != p10).ToList();
         }
 
         [Benchmark]
         public List<ExtraLarge> EFCoreInterpolatedExtraLarge()
         {
-            return context.ExtraLarge.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().ToList();
+            return context.ExtraLarge.FromSqlInterpolated(SqlEFInterpolated).ToList();
         }
 
         [Benchmark]
         public List<ExtraLarge> EFCoreRawExtraLarge()
         {
-            return context.ExtraLarge.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().ToList();
+            return context.ExtraLarge.FromSqlRaw(SqlEFRaw, ParametersArray).ToList();
         }
 
         [Benchmark]

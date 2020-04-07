@@ -18,7 +18,7 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class MediumBenchmark
     {
-        private static readonly Func<DbMapDbContext, int, int, int, int, int, IEnumerable<Medium>> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1, int p2, int p3, int p4, int p5) => context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0).AsNoTracking());
+        private static readonly Func<DbMapDbContext, int, int, int, int, int, IEnumerable<Medium>> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1, int p2, int p3, int p4, int p5) => context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0));
 
         private static readonly int p1 = 1;
         private static readonly int p2 = 2;
@@ -72,19 +72,19 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark]
         public List<Medium> EFCoreLinqMedium()
         {
-            return context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0).AsNoTracking().ToList();
+            return context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0).ToList();
         }
 
         [Benchmark]
         public List<Medium> EFCoreInterpolatedMedium()
         {
-            return context.Medium.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().ToList();
+            return context.Medium.FromSqlInterpolated(SqlEFInterpolated).ToList();
         }
 
         [Benchmark]
         public List<Medium> EFCoreRawMedium()
         {
-            return context.Medium.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().ToList();
+            return context.Medium.FromSqlRaw(SqlEFRaw, ParametersArray).ToList();
         }
 
         [Benchmark]

@@ -17,7 +17,7 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class ExtraSmallBenchmark
     {
-        private static readonly Func<DbMapDbContext, int, ExtraSmall> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1) => context.ExtraSmall.Where(extraSmall => p1 != 1).AsNoTracking().FirstOrDefault());
+        private static readonly Func<DbMapDbContext, int, ExtraSmall> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1) => context.ExtraSmall.FirstOrDefault(extraSmall => p1 != 1));
         
         private static readonly int p1 = 1;
 
@@ -67,19 +67,19 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark]
         public ExtraSmall EFCoreLinqExtraSmall()
         {
-            return context.ExtraSmall.Where(extraSmall => p1 != 1).AsNoTracking().FirstOrDefault();
+            return context.ExtraSmall.FirstOrDefault(extraSmall => p1 != 1);
         }
 
         [Benchmark]
         public ExtraSmall EFCoreInterpolatedExtraSmall()
         {
-            return context.ExtraSmall.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().FirstOrDefault();
+            return context.ExtraSmall.FromSqlInterpolated(SqlEFInterpolated).FirstOrDefault();
         }
 
         [Benchmark]
         public ExtraSmall EFCoreRawExtraSmall()
         {
-            return context.ExtraSmall.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().FirstOrDefault();
+            return context.ExtraSmall.FromSqlRaw(SqlEFRaw, ParametersArray).FirstOrDefault();
         }
 
         [Benchmark]
