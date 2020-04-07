@@ -15,10 +15,10 @@ using RepoDb;
 
 namespace DbMap.Benchmark.BenchmarkSuite
 {
-    [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
+    [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 5000)]
     public class MediumBenchmark
     {
-        private static readonly Func<DbMapDbContext, int, int, int, int, int, IEnumerable<Medium>> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1, int p2, int p3, int p4, int p5) => context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0));
+        private static readonly Func<DbMapDbContext, int, int, int, int, int, IEnumerable<Medium>> EFCoreCompliedQuery = EF.CompileQuery((DbMapDbContext context, int p1, int p2, int p3, int p4, int p5) => context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0));
 
         private static readonly int p1 = 1;
         private static readonly int p2 = 2;
@@ -64,12 +64,6 @@ namespace DbMap.Benchmark.BenchmarkSuite
         }
 
         [Benchmark]
-        public List<Medium> EFCoreLinqCompiledMedium()
-        {
-            return EFCoreLinqCompiledCompiled(context, p1, p2, p3, p4, p5).ToList();
-        }
-
-        [Benchmark]
         public List<Medium> EFCoreLinqMedium()
         {
             return context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0).ToList();
@@ -85,6 +79,12 @@ namespace DbMap.Benchmark.BenchmarkSuite
         public List<Medium> EFCoreRawMedium()
         {
             return context.Medium.FromSqlRaw(SqlEFRaw, ParametersArray).ToList();
+        }
+
+        [Benchmark]
+        public List<Medium> EFCoreCompliedLinqMedium()
+        {
+            return EFCoreCompliedQuery(context, p1, p2, p3, p4, p5).ToList();
         }
 
         [Benchmark]

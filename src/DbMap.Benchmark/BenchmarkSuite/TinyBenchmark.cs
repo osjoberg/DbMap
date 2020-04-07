@@ -17,7 +17,7 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class TinyBenchmark
     {
-        private static readonly Func<DbMapDbContext, int, string> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1) => context.Tiny.Where(tiny => p1 == 1).Select(tiny => tiny.String).First());
+        private static readonly Func<DbMapDbContext, int, string> EFCoreCompliedQuery = EF.CompileQuery((DbMapDbContext context, int p1) => context.Tiny.Where(tiny => p1 == 1).Select(tiny => tiny.String).First());
 
         private static readonly int p1 = 1;
 
@@ -59,12 +59,6 @@ namespace DbMap.Benchmark.BenchmarkSuite
         }
 
         [Benchmark]
-        public string EFCoreLinqCompiledTiny()
-        {
-            return EFCoreLinqCompiledCompiled(context, p1);
-        }
-
-        [Benchmark]
         public string EFCoreLinqTiny()
         {
             return context.Tiny.Where(tiny => p1 == 1).Select(tiny => tiny.String).First();
@@ -80,6 +74,12 @@ namespace DbMap.Benchmark.BenchmarkSuite
         public string EFCoreRawTiny()
         {
             return context.Tiny.FromSqlRaw(SqlEFRaw, ParametersArray).Select(tiny => tiny.String).First();
+        }
+
+        [Benchmark]
+        public string EFCoreCompliedLinqTiny()
+        {
+            return EFCoreCompliedQuery(context, p1);
         }
 
         [Benchmark]

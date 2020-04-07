@@ -18,7 +18,7 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class SmallBenchmark
     {
-        private static readonly Func<DbMapDbContext, int, IEnumerable<Small>> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1) => context.Small.Where(small => p1 == 1));
+        private static readonly Func<DbMapDbContext, int, IEnumerable<Small>> EFCoreCompliedQuery = EF.CompileQuery((DbMapDbContext context, int p1) => context.Small.Where(small => p1 == 1));
 
         private static readonly int p1 = 1;
 
@@ -60,12 +60,6 @@ namespace DbMap.Benchmark.BenchmarkSuite
         }
 
         [Benchmark]
-        public List<Small> EFCoreLinqCompiledSmall()
-        {
-            return EFCoreLinqCompiledCompiled(context, p1).ToList();
-        }
-
-        [Benchmark]
         public List<Small> EFCoreLinqSmall()
         {
             return context.Small.Where(small => p1 == 1).ToList();
@@ -81,6 +75,12 @@ namespace DbMap.Benchmark.BenchmarkSuite
         public List<Small> EFCoreRawSmall()
         {
             return context.Small.FromSqlRaw(SqlEFRaw, ParametersArray).ToList();
+        }
+
+        [Benchmark]
+        public List<Small> EFCoreCompliedLinqSmall()
+        {
+            return EFCoreCompliedQuery(context, p1).ToList();
         }
 
         [Benchmark]

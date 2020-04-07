@@ -17,7 +17,7 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class ExtraSmallBenchmark
     {
-        private static readonly Func<DbMapDbContext, int, ExtraSmall> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1) => context.ExtraSmall.FirstOrDefault(extraSmall => p1 != 1));
+        private static readonly Func<DbMapDbContext, int, ExtraSmall> EFCoreCompliedQuery = EF.CompileQuery((DbMapDbContext context, int p1) => context.ExtraSmall.FirstOrDefault(extraSmall => p1 != 1));
         
         private static readonly int p1 = 1;
 
@@ -59,12 +59,6 @@ namespace DbMap.Benchmark.BenchmarkSuite
         }
 
         [Benchmark]
-        public ExtraSmall EFCoreLinqCompiledExtraSmall()
-        {
-            return EFCoreLinqCompiledCompiled(context, p1);
-        }
-
-        [Benchmark]
         public ExtraSmall EFCoreLinqExtraSmall()
         {
             return context.ExtraSmall.FirstOrDefault(extraSmall => p1 != 1);
@@ -80,6 +74,12 @@ namespace DbMap.Benchmark.BenchmarkSuite
         public ExtraSmall EFCoreRawExtraSmall()
         {
             return context.ExtraSmall.FromSqlRaw(SqlEFRaw, ParametersArray).FirstOrDefault();
+        }
+
+        [Benchmark]
+        public ExtraSmall EFCoreCompliedLinqExtraSmall()
+        {
+            return EFCoreCompliedQuery(context, p1);
         }
 
         [Benchmark]
