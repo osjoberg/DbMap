@@ -21,6 +21,7 @@ namespace DbMap.Benchmark
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlServer(ConfigurationManager.ConnectionStrings["SqlServer"].ConnectionString);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -17,6 +17,8 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class TinyBenchmark
     {
+        private static readonly Func<DbMapDbContext, int, string> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1) => context.Tiny.Where(tiny => p1 == 1).Select(tiny => tiny.String).AsNoTracking().First());
+
         private static readonly int p1 = 1;
 
         private static readonly string Sql = $"SELECT {string.Join(", ", Tiny.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Tiny WHERE @p1 = 1";
@@ -54,6 +56,12 @@ namespace DbMap.Benchmark.BenchmarkSuite
         {
             connection.Dispose();
             context.Dispose();
+        }
+
+        [Benchmark]
+        public string EFCoreLinqCompiledTiny()
+        {
+            return EFCoreLinqCompiledCompiled(context, p1);
         }
 
         [Benchmark]

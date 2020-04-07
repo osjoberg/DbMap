@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -17,6 +18,8 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class SmallBenchmark
     {
+        private static readonly Func<DbMapDbContext, int, IEnumerable<Small>> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1) => context.Small.Where(small => p1 == 1).AsNoTracking());
+
         private static readonly int p1 = 1;
 
         private static readonly string Sql = $"SELECT {string.Join(", ", Small.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Small WHERE @p1 = 1";
@@ -57,39 +60,45 @@ namespace DbMap.Benchmark.BenchmarkSuite
         }
 
         [Benchmark]
-        public Small EFCoreLinqSmall()
+        public List<Small> EFCoreLinqCompiledSmall()
         {
-            return context.Small.Where(small => p1 == 1).AsNoTracking().FirstOrDefault();
+            return EFCoreLinqCompiledCompiled(context, p1).ToList();
         }
 
         [Benchmark]
-        public Small EFCoreInterpolatedSmall()
+        public List<Small> EFCoreLinqSmall()
         {
-            return context.Small.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().FirstOrDefault();
+            return context.Small.Where(small => p1 == 1).AsNoTracking().ToList();
         }
 
         [Benchmark]
-        public Small EFCoreRawSmall()
+        public List<Small> EFCoreInterpolatedSmall()
         {
-            return context.Small.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().FirstOrDefault();
+            return context.Small.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().ToList();
         }
 
         [Benchmark]
-        public Small DapperSmall()
+        public List<Small> EFCoreRawSmall()
         {
-            return connection.QueryFirstOrDefault<Small>(Sql, Parameters);
+            return context.Small.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().ToList();
         }
 
         [Benchmark]
-        public Small RepoDbSmall()
+        public List<Small> DapperSmall()
         {
-            return connection.ExecuteQuery<Small>(Sql, Parameters).FirstOrDefault();
+            return connection.Query<Small>(Sql, Parameters).AsList();
+        }
+
+        [Benchmark]
+        public List<Small> RepoDbSmall()
+        {
+            return connection.ExecuteQuery<Small>(Sql, Parameters).ToList();
         }
 
         [Benchmark(Baseline = true)]
-        public Small DbMapSmall()
+        public List<Small> DbMapSmall()
         {
-            return Query.QueryFirstOrDefault<Small>(connection, Parameters);
+            return Query.Query<Small>(connection, Parameters).ToList();
         }
     }
 }

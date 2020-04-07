@@ -18,6 +18,8 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class MediumBenchmark
     {
+        private static readonly Func<DbMapDbContext, int, int, int, int, int, IEnumerable<Medium>> EFCoreLinqCompiledCompiled = EF.CompileQuery((DbMapDbContext context, int p1, int p2, int p3, int p4, int p5) => context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0).AsNoTracking());
+
         private static readonly int p1 = 1;
         private static readonly int p2 = 2;
         private static readonly int p3 = 3;
@@ -62,21 +64,27 @@ namespace DbMap.Benchmark.BenchmarkSuite
         }
 
         [Benchmark]
+        public List<Medium> EFCoreLinqCompiledMedium()
+        {
+            return EFCoreLinqCompiledCompiled(context, p1, p2, p3, p4, p5).ToList();
+        }
+
+        [Benchmark]
         public List<Medium> EFCoreLinqMedium()
         {
-            return context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0).AsNoTracking().AsList();
+            return context.Medium.Where(medium => p1 != p2 || p3 != p4 || p5 != 0).AsNoTracking().ToList();
         }
 
         [Benchmark]
         public List<Medium> EFCoreInterpolatedMedium()
         {
-            return context.Medium.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
+            return context.Medium.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().ToList();
         }
 
         [Benchmark]
         public List<Medium> EFCoreRawMedium()
         {
-            return context.Medium.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
+            return context.Medium.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().ToList();
         }
 
         [Benchmark]
@@ -88,13 +96,13 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark]
         public List<Medium> RepoDbMedium()
         {
-            return connection.ExecuteQuery<Medium>(Sql, Parameters).AsList();
+            return connection.ExecuteQuery<Medium>(Sql, Parameters).ToList();
         }
 
         [Benchmark(Baseline = true)]
         public List<Medium> DbMapMedium()
         {
-            return Query.Query<Medium>(connection, Parameters).AsList();
+            return Query.Query<Medium>(connection, Parameters).ToList();
         }
     }
 }
