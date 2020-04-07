@@ -68,19 +68,19 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark]
         public List<ExtraLarge> EFCoreLinqExtraLarge()
         {
-            return context.ExtraLarge.Where(extraLarge => p1 != p2 || p3 != p4 || p5 != p6 || p7 != p8 || p9 != p10).AsNoTracking().AsList();
+            return context.ExtraLarge.Where(extraLarge => p1 != p2 || p3 != p4 || p5 != p6 || p7 != p8 || p9 != p10).AsNoTracking().ToList();
         }
 
         [Benchmark]
         public List<ExtraLarge> EFCoreInterpolatedExtraLarge()
         {
-            return context.ExtraLarge.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
+            return context.ExtraLarge.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().ToList();
         }
 
         [Benchmark]
         public List<ExtraLarge> EFCoreRawExtraLarge()
         {
-            return context.ExtraLarge.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
+            return context.ExtraLarge.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().ToList();
         }
 
         [Benchmark]
@@ -92,13 +92,13 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark]
         public List<ExtraLarge> RepoDbExtraLarge()
         {
-            return connection.ExecuteQuery<ExtraLarge>(Sql, Parameters).AsList();
+            return connection.ExecuteQuery<ExtraLarge>(Sql, Parameters).ToList();
         }
 
         [Benchmark(Baseline = true)]
         public List<ExtraLarge> DbMapExtraLarge()
         {
-            return Query.Query<ExtraLarge>(connection, Parameters).AsList();
+            return Query.Query<ExtraLarge>(connection, Parameters).ToList();
         }
     }
 }

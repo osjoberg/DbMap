@@ -43,25 +43,25 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<int?> Int32Null()
         {
-            return Query.Query<int?>(sqlConnection, Int32NullParameters).AsList();
+            return Query.Query<int?>(sqlConnection, Int32NullParameters).ToList();
         }
 
         [Benchmark]
         public List<int?> Int32NotNull()
         {
-            return Query.Query<int?>(sqlConnection, Int32ValueParameters).AsList();
+            return Query.Query<int?>(sqlConnection, Int32ValueParameters).ToList();
         }
 
         [Benchmark]
         public List<int?> StringNull()
         {
-            return Query.Query<int?>(sqlConnection, StringNullParameters).AsList();
+            return Query.Query<int?>(sqlConnection, StringNullParameters).ToList();
         }
 
         [Benchmark]
         public List<int?> StringNotNull()
         {
-            return Query.Query<int?>(sqlConnection, StringValueParameters).AsList();
+            return Query.Query<int?>(sqlConnection, StringValueParameters).ToList();
         }
     }
 }

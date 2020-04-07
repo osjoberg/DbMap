@@ -52,19 +52,19 @@ namespace DbMap.Benchmark.Benchmarks
         [Benchmark]
         public List<int?> Null()
         {
-            return NullQuery.Query<int?>(sqlConnection).AsList();
+            return NullQuery.Query<int?>(sqlConnection).ToList();
         }
 
         [Benchmark]
         public List<int?> NotNull()
         {
-            return NotNullQuery.Query<int?>(sqlConnection).AsList();
+            return NotNullQuery.Query<int?>(sqlConnection).ToList();
         }
 
         [Benchmark]
         public List<int?> EveryOtherNull()
         {
-            return EveryOtherNullQuery.Query<int?>(sqlConnection).AsList();
+            return EveryOtherNullQuery.Query<int?>(sqlConnection).ToList();
         }
     }
 }

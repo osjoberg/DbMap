@@ -68,19 +68,19 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark]
         public List<Large> EFCoreLinqLarge()
         {
-            return context.Large.Where(large => p1 != p2 || p3 != p4 || p5 != p6 || p7 != p8 || p9 != p10).AsNoTracking().AsList();
+            return context.Large.Where(large => p1 != p2 || p3 != p4 || p5 != p6 || p7 != p8 || p9 != p10).AsNoTracking().ToList();
         }
 
         [Benchmark]
         public List<Large> EFCoreInterpolatedLarge()
         {
-            return context.Large.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().AsList();
+            return context.Large.FromSqlInterpolated(SqlEFInterpolated).AsNoTracking().ToList();
         }
 
         [Benchmark]
         public List<Large> EFCoreRawLarge()
         {
-            return context.Large.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().AsList();
+            return context.Large.FromSqlRaw(SqlEFRaw, ParametersArray).AsNoTracking().ToList();
         }
 
         [Benchmark]
@@ -92,13 +92,13 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark]
         public List<Large> RepoDbLarge()
         {
-            return connection.ExecuteQuery<Large>(Sql, Parameters).AsList();
+            return connection.ExecuteQuery<Large>(Sql, Parameters).ToList();
         }
 
         [Benchmark(Baseline = true)]
         public List<Large> DbMapLarge()
         {
-            return Query.Query<Large>(connection, Parameters).AsList();
+            return Query.Query<Large>(connection, Parameters).ToList();
         }
     }
 }
