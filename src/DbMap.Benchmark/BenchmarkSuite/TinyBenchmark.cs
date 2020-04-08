@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -98,6 +99,23 @@ namespace DbMap.Benchmark.BenchmarkSuite
         public string DbMapTiny()
         {
             return Query.QueryFirst<string>(connection, Parameters);
+        }
+
+        [Benchmark]
+        public string HandwrittenTiny()
+        {
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+            }
+            
+            using var command = new SqlCommand(Sql, connection);
+
+            command.Parameters.Add(new SqlParameter("p1", p1));
+
+            using var reader = command.ExecuteReader();
+
+            return reader.Read() && reader.IsDBNull(0) ? reader.GetString(0) : null;
         }
     }
 }

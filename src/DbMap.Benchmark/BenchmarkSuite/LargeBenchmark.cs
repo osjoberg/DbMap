@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -99,6 +100,109 @@ namespace DbMap.Benchmark.BenchmarkSuite
         public List<Large> DbMapLarge()
         {
             return Query.Query<Large>(connection, Parameters).ToList();
+        }
+
+        [Benchmark]
+        public List<Large> HandwrittenLarge()
+        {
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+            }
+
+            using var command = new SqlCommand(Sql, connection);
+
+            command.Parameters.Add(new SqlParameter("p1", p1));
+            command.Parameters.Add(new SqlParameter("p2", p2));
+            command.Parameters.Add(new SqlParameter("p3", p3));
+            command.Parameters.Add(new SqlParameter("p4", p4));
+            command.Parameters.Add(new SqlParameter("p5", p5));
+            command.Parameters.Add(new SqlParameter("p6", p6));
+            command.Parameters.Add(new SqlParameter("p7", p7));
+            command.Parameters.Add(new SqlParameter("p8", p8));
+            command.Parameters.Add(new SqlParameter("p9", p9));
+            command.Parameters.Add(new SqlParameter("p10", p10));
+
+            using var reader = command.ExecuteReader();
+
+            var result = new List<Large>();
+
+            while (reader.Read())
+            {
+                var item = new Large
+                {
+                    Boolean = reader.GetBoolean(0),
+                    Byte =  reader.GetByte(1),
+                    DateTime = reader.GetDateTime(2),
+                    Decimal = reader.GetDecimal(3),
+                    Double = reader.GetDouble(4),
+                    Guid = reader.GetGuid(5),
+                    Int16 = reader.GetInt16(6),
+                    Int32 = reader.GetInt32(7),
+                    Int64 = reader.GetInt64(8),
+                    Single = reader.GetFloat(9),
+                    String = reader.GetString(10)
+                };
+
+                if (reader.IsDBNull(11) == false)
+                {
+                    item.NullableBoolean = reader.GetBoolean(11);
+                }
+
+                if (reader.IsDBNull(12) == false)
+                {
+                    item.NullableByte = reader.GetByte(12);
+                }
+
+                if (reader.IsDBNull(13) == false)
+                {
+                    item.NullableDateTime = reader.GetDateTime(13);
+                }
+
+                if (reader.IsDBNull(14) == false)
+                {
+                    item.NullableDecimal = reader.GetDecimal(14);
+                }
+
+                if (reader.IsDBNull(15) == false)
+                {
+                    item.NullableDouble = reader.GetDouble(15);
+                }
+
+                if (reader.IsDBNull(16) == false)
+                {
+                    item.NullableGuid = reader.GetGuid(16);
+                }
+
+                if (reader.IsDBNull(17) == false)
+                {
+                    item.NullableInt16 = reader.GetInt16(17);
+                }
+
+                if (reader.IsDBNull(18) == false)
+                {
+                    item.NullableInt32 = reader.GetInt32(18);
+                }
+
+                if (reader.IsDBNull(19) == false)
+                {
+                    item.NullableInt64 = reader.GetInt64(19);
+                }
+
+                if (reader.IsDBNull(20) == false)
+                {
+                    item.NullableSingle = reader.GetFloat(20);
+                }
+
+                if (reader.IsDBNull(21) == false)
+                {
+                    item.NullableString = reader.GetString(21);
+                }
+
+                result.Add(item);
+            }
+
+            return result;
         }
     }
 }

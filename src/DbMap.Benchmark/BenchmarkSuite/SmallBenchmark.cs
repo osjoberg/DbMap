@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -99,6 +100,52 @@ namespace DbMap.Benchmark.BenchmarkSuite
         public List<Small> DbMapSmall()
         {
             return Query.Query<Small>(connection, Parameters).ToList();
+        }
+
+        [Benchmark]
+        public List<Small> HandwrittenSmall()
+        {
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+            }
+
+            using var command = new SqlCommand(Sql, connection);
+
+            command.Parameters.Add(new SqlParameter("p1", p1));
+
+            using var reader = command.ExecuteReader();
+
+            var result = new List<Small>();
+
+            while (reader.Read())
+            {
+                var item = new Small
+                {
+                    Boolean = reader.GetBoolean(0),
+                    Int32 = reader.GetInt32(1),
+                    String = reader.GetString(2)
+                };
+
+                if (reader.IsDBNull(3) == false)
+                {
+                    item.NullableBoolean = reader.GetBoolean(3);
+                }
+
+                if (reader.IsDBNull(4) == false)
+                {
+                    item.NullableInt32 = reader.GetInt32(4);
+                }
+
+                if (reader.IsDBNull(5) == false)
+                {
+                    item.NullableString= reader.GetString(5);
+                }
+
+                result.Add(item);
+            }
+
+            return result;
         }
     }
 }
