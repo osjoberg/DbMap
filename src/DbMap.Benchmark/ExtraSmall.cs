@@ -19,11 +19,11 @@ namespace DbMap.Benchmark
 
         public string NullableString { get; set; }
 
-        public static Small Create(int index)
+        public static ExtraSmall Create(int index)
         {
             var offset = index * GetAllPropertyNames().Length;
 
-            return new Small
+            return new ExtraSmall
             {
                 Boolean = index % 2 == 0,
                 Int32 = offset + 1,

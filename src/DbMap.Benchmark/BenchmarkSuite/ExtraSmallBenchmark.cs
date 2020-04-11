@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
@@ -19,13 +18,13 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class ExtraSmallBenchmark
     {
-        private static readonly Func<DbMapDbContext, int, ExtraSmall> EFCoreCompliedQuery = EF.CompileQuery((DbMapDbContext context, int p1) => context.ExtraSmall.FirstOrDefault(extraSmall => p1 != 1));
-        
+        private static readonly Func<DbMapDbContext, int, ExtraSmall> EFCoreCompliedQuery = EF.CompileQuery((DbMapDbContext context, int p1) => context.ExtraSmall.FirstOrDefault(extraSmall => p1 != 0));
+
         private static readonly int p1 = 1;
 
-        private static readonly string Sql = $"SELECT {string.Join(", ", ExtraSmall.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM ExtraSmall WHERE @p1 <> 1";
+        private static readonly string Sql = $"SELECT {string.Join(", ", ExtraSmall.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM ExtraSmall WHERE @p1 <> 0";
         private static readonly string SqlEFRaw = Regex.Replace(Sql, "@p([0-9]+)", match => "{" + (int.Parse(match.Groups[1].Value) - 1) + "}");
-        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Int32], [String], [NullableBoolean], [NullableInt32], [NullableString] FROM ExtraSmall WHERE {p1} <> 1";
+        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Int32], [String], [NullableBoolean], [NullableInt32], [NullableString] FROM ExtraSmall WHERE {p1} <> 0";
 
         private static readonly object Parameters = new { p1 };
         private static readonly object[] ParametersArray = { p1 };
@@ -63,7 +62,7 @@ namespace DbMap.Benchmark.BenchmarkSuite
         [Benchmark]
         public ExtraSmall EFCoreLinqExtraSmall()
         {
-            return context.ExtraSmall.FirstOrDefault(extraSmall => p1 != 1);
+            return context.ExtraSmall.FirstOrDefault(extraSmall => p1 != 0);
         }
 
         [Benchmark]
@@ -103,48 +102,49 @@ namespace DbMap.Benchmark.BenchmarkSuite
         }
 
         [Benchmark]
-        public List<ExtraSmall> HandwrittenExtraSmall()
+        public ExtraSmall HandwrittenExtraSmall()
         {
             if (connection.State == ConnectionState.Closed)
             {
                 connection.Open();
             }
 
-            using var command = new SqlCommand(Sql, connection);
-            command.Parameters.Add(new SqlParameter("p1", p1));
-
-            using var reader = command.ExecuteReader();
-
-            var result = new List<ExtraSmall>();
-
-            while (reader.Read())
+            using (var command = new SqlCommand(Sql, connection))
             {
-                var item = new ExtraSmall
-                {
-                    Boolean = reader.GetBoolean(0),
-                    Int32 = reader.GetInt32(1),
-                    String = reader.GetString(2)
-                };
+                command.Parameters.Add(new SqlParameter("@p1", p1));
 
-                if (reader.IsDBNull(3) == false)
+                using (var reader = command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess | CommandBehavior.SingleRow))
                 {
-                    item.NullableBoolean = reader.GetBoolean(3);
+                    if (reader.Read() == false)
+                    {
+                        return null;
+                    }
+
+                    var item = new ExtraSmall
+                    {
+                        Boolean = reader.GetBoolean(0),
+                        Int32 = reader.GetInt32(1),
+                        String = reader.GetString(2)
+                    };
+
+                    if (reader.IsDBNull(3) == false)
+                    {
+                        item.NullableBoolean = reader.GetBoolean(3);
+                    }
+
+                    if (reader.IsDBNull(4) == false)
+                    {
+                        item.NullableInt32 = reader.GetInt32(4);
+                    }
+
+                    if (reader.IsDBNull(5) == false)
+                    {
+                        item.NullableString = reader.GetString(5);
+                    }
+
+                    return item;
                 }
-
-                if (reader.IsDBNull(4) == false)
-                {
-                    item.NullableInt32= reader.GetInt32(4);
-                }
-
-                if (reader.IsDBNull(5) == false)
-                {
-                    item.NullableString= reader.GetString(5);
-                }
-
-                result.Add(item);
             }
-
-            return result;
         }
     }
 }

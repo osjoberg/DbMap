@@ -38,7 +38,7 @@ namespace DbMap.Benchmark
                         new Column<int?>("NullableInt32"),
                         new Column<string>("NullableString", nullable: true, length: 10));
 
-                    db.Tables["ExtraSmall"].Rows.AddRange(Enumerable.Range(0, 1).Select(Small.Create));
+                    db.Tables["ExtraSmall"].Rows.AddRange(Enumerable.Range(0, 1).Select(ExtraSmall.Create));
                 });
 
             steps.Add(

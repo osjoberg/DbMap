@@ -108,14 +108,13 @@ namespace DbMap.Benchmark.BenchmarkSuite
             {
                 connection.Open();
             }
-            
-            using var command = new SqlCommand(Sql, connection);
 
-            command.Parameters.Add(new SqlParameter("p1", p1));
+            using (var command = new SqlCommand(Sql, connection))
+            {
+                command.Parameters.Add(new SqlParameter("@p1", p1));
 
-            using var reader = command.ExecuteReader();
-
-            return reader.Read() && reader.IsDBNull(0) ? reader.GetString(0) : null;
+                return command.ExecuteScalar() as string;
+            }
         }
     }
 }

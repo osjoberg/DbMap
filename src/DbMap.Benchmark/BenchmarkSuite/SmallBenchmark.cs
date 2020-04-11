@@ -19,13 +19,13 @@ namespace DbMap.Benchmark.BenchmarkSuite
     [SimpleJob(launchCount: 3, warmupCount: 5, targetCount: 20, invocationCount: 10000)]
     public class SmallBenchmark
     {
-        private static readonly Func<DbMapDbContext, int, IEnumerable<Small>> EFCoreCompliedQuery = EF.CompileQuery((DbMapDbContext context, int p1) => context.Small.Where(small => p1 == 1));
+        private static readonly Func<DbMapDbContext, int, IEnumerable<Small>> EFCoreCompliedQuery = EF.CompileQuery((DbMapDbContext context, int p1) => context.Small.Where(small => p1 != 0));
 
         private static readonly int p1 = 1;
 
-        private static readonly string Sql = $"SELECT {string.Join(", ", Small.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Small WHERE @p1 = 1";
+        private static readonly string Sql = $"SELECT {string.Join(", ", Small.GetAllPropertyNames().Select(name => "[" + name + "]"))} FROM Small WHERE @p1 <> 0";
         private static readonly string SqlEFRaw = Regex.Replace(Sql, "@p([0-9]+)", match => "{" + (int.Parse(match.Groups[1].Value) - 1) + "}");
-        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Int32], [String], [NullableBoolean], [NullableInt32], [NullableString] FROM Small WHERE {p1} = 1";
+        private static readonly FormattableString SqlEFInterpolated = $"SELECT [Boolean], [Int32], [String], [NullableBoolean], [NullableInt32], [NullableString] FROM Small WHERE {p1} <> 0";
 
         private static readonly object Parameters = new { p1 };
         private static readonly object[] ParametersArray = { p1 };
@@ -110,42 +110,44 @@ namespace DbMap.Benchmark.BenchmarkSuite
                 connection.Open();
             }
 
-            using var command = new SqlCommand(Sql, connection);
-
-            command.Parameters.Add(new SqlParameter("p1", p1));
-
-            using var reader = command.ExecuteReader();
-
-            var result = new List<Small>();
-
-            while (reader.Read())
+            using (var command = new SqlCommand(Sql, connection))
             {
-                var item = new Small
-                {
-                    Boolean = reader.GetBoolean(0),
-                    Int32 = reader.GetInt32(1),
-                    String = reader.GetString(2)
-                };
+                command.Parameters.Add(new SqlParameter("@p1", p1));
 
-                if (reader.IsDBNull(3) == false)
+                using (var reader = command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess))
                 {
-                    item.NullableBoolean = reader.GetBoolean(3);
+                    var result = new List<Small>();
+
+                    while (reader.Read())
+                    {
+                        var item = new Small
+                        {
+                            Boolean = reader.GetBoolean(0),
+                            Int32 = reader.GetInt32(1),
+                            String = reader.GetString(2)
+                        };
+
+                        if (reader.IsDBNull(3) == false)
+                        {
+                            item.NullableBoolean = reader.GetBoolean(3);
+                        }
+
+                        if (reader.IsDBNull(4) == false)
+                        {
+                            item.NullableInt32 = reader.GetInt32(4);
+                        }
+
+                        if (reader.IsDBNull(5) == false)
+                        {
+                            item.NullableString = reader.GetString(5);
+                        }
+
+                        result.Add(item);
+                    }
+
+                    return result;
                 }
-
-                if (reader.IsDBNull(4) == false)
-                {
-                    item.NullableInt32 = reader.GetInt32(4);
-                }
-
-                if (reader.IsDBNull(5) == false)
-                {
-                    item.NullableString= reader.GetString(5);
-                }
-
-                result.Add(item);
             }
-
-            return result;
         }
     }
 }
