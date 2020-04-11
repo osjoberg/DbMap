@@ -9,9 +9,9 @@ namespace DbMap.Deserialization
         private static readonly object CacheLock = new object();
         private static Dictionary<CacheItem, DataReaderDeserializer> cache = new Dictionary<CacheItem, DataReaderDeserializer>(CacheItemComparerInstance);
 
-        internal static DataReaderDeserializer GetCachedOrBuildNew(Type dataReaderType, Type type, string[] columnNames, Type[] columnTypes)
+        internal static DataReaderDeserializer GetCachedOrBuildNew(Type connectionType, Type type, string[] columnNames, Type[] columnTypes)
         {
-            var item = new CacheItem(dataReaderType, type, columnNames, columnTypes);
+            var item = new CacheItem(connectionType, type, columnNames, columnTypes);
             if (cache.TryGetValue(item, out var value))
             {
                 return value;
@@ -24,7 +24,7 @@ namespace DbMap.Deserialization
                     return value;
                 }
 
-                value = DataReaderDeserializerFactory.Create(dataReaderType, type, columnNames, columnTypes);
+                value = DataReaderDeserializerFactory.Create(connectionType, type, columnNames, columnTypes);
                 cache = new Dictionary<CacheItem, DataReaderDeserializer>(cache, CacheItemComparerInstance) { { item, value } };
                 return value;
             }
@@ -32,15 +32,15 @@ namespace DbMap.Deserialization
 
         private struct CacheItem
         {
-            public CacheItem(Type dataReaderType, Type type, string[] columnNames, Type[] columnTypes)
+            public CacheItem(Type connectionType, Type type, string[] columnNames, Type[] columnTypes)
             {
-                DataReaderType = dataReaderType;
+                ConnectionType = connectionType;
                 Type = type;
                 ColumnNames = columnNames;
                 ColumnTypes = columnTypes;
             }
 
-            public Type DataReaderType { get; }
+            public Type ConnectionType { get; }
 
             public Type Type { get; }
 
@@ -79,7 +79,7 @@ namespace DbMap.Deserialization
                     }
                 }
 
-                if (ReferenceEquals(x.DataReaderType, y.DataReaderType) == false)
+                if (ReferenceEquals(x.ConnectionType, y.ConnectionType) == false)
                 {
                     return false;
                 }
@@ -93,10 +93,10 @@ namespace DbMap.Deserialization
                 {
                     if (obj.ColumnNames.Length == 0)
                     {
-                        return obj.DataReaderType.GetHashCode() ^ obj.Type.GetHashCode() ^ obj.ColumnTypes[0].GetHashCode();
+                        return obj.ConnectionType.GetHashCode() ^ obj.Type.GetHashCode() ^ obj.ColumnTypes[0].GetHashCode();
                     }
 
-                    return obj.DataReaderType.GetHashCode() ^ obj.Type.GetHashCode() ^ obj.ColumnNames.Length ^ obj.ColumnNames[0].GetHashCode() ^ obj.ColumnNames[obj.ColumnNames.Length - 1].GetHashCode();
+                    return obj.ConnectionType.GetHashCode() ^ obj.Type.GetHashCode() ^ obj.ColumnNames.Length ^ obj.ColumnNames[0].GetHashCode() ^ obj.ColumnNames[obj.ColumnNames.Length - 1].GetHashCode();
                 }
             }
         }

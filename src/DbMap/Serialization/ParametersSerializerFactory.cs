@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections;
+using System.Data.Common;
 using System.Reflection;
 using System.Reflection.Emit;
 
+using DbMap.Deserialization;
 using DbMap.Infrastructure;
 
 namespace DbMap.Serialization
@@ -10,9 +11,8 @@ namespace DbMap.Serialization
     internal static class ParametersSerializerFactory
     {
         private static readonly FieldInfo DbNull = typeof(DBNull).GetField(nameof(DBNull.Value));
-        private static readonly MethodInfo ListAdd = typeof(IList).GetMethod(nameof(IList.Add), new[] { typeof(object) });
 
-        internal static ParametersSerializer Create(Type dataParameterType, Type parametersType)
+        internal static ParametersSerializer Create(Type connectionType, Type parametersType)
         {
             var moduleBuilder = DynamicAssembly.GetExistingDynamicAssemblyOrCreateNew(parametersType.Assembly);
 
@@ -21,7 +21,7 @@ namespace DbMap.Serialization
 
             // Serialize().
             {
-                var method = typeBuilder.DefineMethod(nameof(ParametersSerializer.Serialize), MethodAttributes.Public | MethodAttributes.Virtual, CallingConventions.Standard, typeof(void), new[] { typeof(IList), typeof(object) });
+                var method = typeBuilder.DefineMethod(nameof(ParametersSerializer.Serialize), MethodAttributes.Public | MethodAttributes.Virtual, CallingConventions.Standard, typeof(void), new[] { typeof(DbParameterCollection), typeof(object) });
                 var il = method.GetILGenerator();
 
                 var locals = new LocalsMap(il);
@@ -101,8 +101,10 @@ namespace DbMap.Serialization
                         il.Emit(OpCodes.Box, propertyInfo.PropertyType);
                     }
 
-                    il.Emit(OpCodes.Newobj, dataParameterType.GetConstructor(new[] { typeof(string), typeof(object) }));
-                    il.Emit(OpCodes.Callvirt, ListAdd);
+                    var adoProviderMetadata = AdoProviderMetadata.GetMetadata(connectionType);
+
+                    il.Emit(OpCodes.Newobj, adoProviderMetadata.ParameterConstructor);
+                    il.Emit(OpCodes.Call, adoProviderMetadata.ParameterCollectionAddMethod);
                     il.Emit(OpCodes.Pop);
                 }
 

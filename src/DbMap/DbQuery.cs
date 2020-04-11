@@ -189,7 +189,7 @@ namespace DbMap
             {
                 ThrowException.ValueCannotBeNull(nameof(connection));
             }
-
+            
             using (var command = SetupCommand(connection, parameters, transaction))
             using (var reader = (DbDataReader)command.ExecuteReader(CommandBehavior.SingleResult | CommandBehavior.SequentialAccess | CommandBehavior.SingleRow))
             {
@@ -288,34 +288,6 @@ namespace DbMap
             }
         }
 
-        private void SetupDataReaderDeserializer(Type type, DbDataReader reader)
-        {
-            if (ReferenceEquals(type, returnType)) 
-            {
-                return;
-            }
-
-            var columnNames = DbQueryInternal.IsClrType(type) ? NoColumnNames : DbQueryInternal.GetColumnNames(reader);
-            var columnTypes = DbQueryInternal.GetColumnTypes(reader);
-            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(reader.GetType(), type, columnNames, columnTypes);
-            returnType = type;
-        }
-
-        private void SetupDataReaderDeserializer(DbDataReader reader)
-        {
-            if (returnType != null)
-            {
-                return;
-            }
-
-            var columnNames = DbQueryInternal.GetColumnNames(reader);
-            var columnTypes = DbQueryInternal.GetColumnTypes(reader);
-
-            returnType = DynamicTypeCache.GetCachedOrBuildNew(columnNames, columnTypes);
-
-            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(reader.GetType(), returnType, columnNames, columnTypes);
-        }
-
         private IDbCommand SetupCommand(IDbConnection connection, object parameters, IDbTransaction transaction)
         {
             if (connection.State == ConnectionState.Closed)
@@ -334,31 +306,66 @@ namespace DbMap
 
             command.Transaction = transaction;
 
+            var currentConnectionType = connection.GetType();
+
             if (parameters == null)
             {
+                if (ReferenceEquals(connectionType, currentConnectionType) == false)
+                {
+                    connectionType = currentConnectionType;
+                    returnType = null;
+                }
+
                 return command;
             }
 
-            var newParametersType = parameters.GetType();
-            var newConnectionType = connection.GetType();
+            var currentParametersType = parameters.GetType();
 
-            if (ReferenceEquals(parametersType, newParametersType) == false || ReferenceEquals(connectionType, newConnectionType) == false)
+            if (ReferenceEquals(parametersType, currentParametersType) == false || ReferenceEquals(connectionType, currentConnectionType) == false)
             {
-                connectionType = newConnectionType;
-                parametersType = newParametersType;
+                connectionType = currentConnectionType;
+                parametersType = currentParametersType;
+                returnType = null;
 
                 if (parametersType.IsClass == false)
                 {
                     ThrowException.NotSupported();
                 }
 
-                var dataParameterType = command.CreateParameter().GetType();
-                parametersSerializer = ParametersSerializerCache.GetCachedOrBuildNew(dataParameterType, parametersType);
+                parametersSerializer = ParametersSerializerCache.GetCachedOrBuildNew(connectionType, parametersType);
             }
 
-            parametersSerializer.Serialize(command.Parameters, parameters);
+            parametersSerializer.Serialize((DbParameterCollection)command.Parameters, parameters);
 
             return command;
+        }
+
+        private void SetupDataReaderDeserializer(Type type, DbDataReader reader)
+        {
+            if (ReferenceEquals(type, returnType)) 
+            {
+                return;
+            }
+
+            var columnNames = DbQueryInternal.IsClrType(type) ? NoColumnNames : DbQueryInternal.GetColumnNames(reader);
+            var columnTypes = DbQueryInternal.GetColumnTypes(reader);
+            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(connectionType, type, columnNames, columnTypes);
+            returnType = type;
+        }
+
+        private void SetupDataReaderDeserializer(DbDataReader reader)
+        {
+            if (returnType != null)
+            {
+                return;
+            }
+
+            var columnNames = DbQueryInternal.GetColumnNames(reader);
+            var columnTypes = DbQueryInternal.GetColumnTypes(reader);
+
+            returnType = DynamicTypeCache.GetCachedOrBuildNew(columnNames, columnTypes);
+
+            dataReaderDeserializer = DataReaderDeserializerCache.GetCachedOrBuildNew(connectionType, returnType, columnNames, columnTypes);
         }
     }
 }

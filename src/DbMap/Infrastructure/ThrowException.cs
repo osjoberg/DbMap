@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Reflection;
 
 namespace DbMap.Infrastructure
 {
     internal static class ThrowException
     {
+        internal static readonly MethodInfo NotSupportedMethod = typeof(ThrowException).GetMethod(nameof(NotSupported));
+
         public static void SequenceContainsNoElements()
         {
             throw new InvalidOperationException("Sequence contains no elements");

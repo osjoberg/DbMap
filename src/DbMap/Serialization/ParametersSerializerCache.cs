@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+ 
 namespace DbMap.Serialization
 {
     internal static class ParametersSerializerCache
@@ -9,9 +9,9 @@ namespace DbMap.Serialization
         private static readonly object CacheLock = new object();
         private static Dictionary<CacheItem, ParametersSerializer> cache = new Dictionary<CacheItem, ParametersSerializer>(Comparer);
 
-        public static ParametersSerializer GetCachedOrBuildNew(Type dataParameterType, Type parametersType)
+        public static ParametersSerializer GetCachedOrBuildNew(Type connectionType, Type parametersType)
         {
-            var cacheItem = new CacheItem(dataParameterType, parametersType);
+            var cacheItem = new CacheItem(parametersType, connectionType);
 
             if (cache.TryGetValue(cacheItem, out var value))
             {
@@ -25,7 +25,7 @@ namespace DbMap.Serialization
                     return value;
                 }
 
-                value = ParametersSerializerFactory.Create(dataParameterType, parametersType);
+                value = ParametersSerializerFactory.Create(connectionType, parametersType);
                 cache = new Dictionary<CacheItem, ParametersSerializer>(cache, Comparer) { { cacheItem, value } };
                 return value;
             }
@@ -33,27 +33,27 @@ namespace DbMap.Serialization
 
         private struct CacheItem
         {
-            public CacheItem(Type dataParameterType, Type parametersType)
+            public CacheItem(Type parametersType, Type connectionType)
             {
-                DataParameterType = dataParameterType;
+                ConnectionType = connectionType;
                 ParametersType = parametersType;
             }
 
-            public Type DataParameterType { get; }
-
             public Type ParametersType { get; }
+
+            public Type ConnectionType { get; }
         }
 
         private class CacheItemComparer : IEqualityComparer<CacheItem>
         {
             public bool Equals(CacheItem x, CacheItem y)
             {
-                return ReferenceEquals(x.ParametersType, y.ParametersType) && ReferenceEquals(x.DataParameterType, y.DataParameterType);
+                return ReferenceEquals(x.ParametersType, y.ParametersType) && ReferenceEquals(x.ConnectionType, y.ConnectionType);
             }
 
             public int GetHashCode(CacheItem obj)
             {
-                return obj.DataParameterType.GetHashCode() ^ obj.ParametersType.GetHashCode();
+                return obj.ParametersType.GetHashCode() ^ obj.ConnectionType.GetHashCode();
             }
         }
     }

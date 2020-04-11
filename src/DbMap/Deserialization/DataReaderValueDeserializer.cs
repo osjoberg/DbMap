@@ -10,13 +10,17 @@ namespace DbMap.Deserialization
     {
         private readonly Type type;
         private readonly int ordinal;
+
+        private readonly DataReaderMetadata dataReaderMetadata;
+
         private readonly MethodInfo getValueMethod;
         private readonly NullableInfo nullableInfo;
         private readonly FieldInfo fieldInfo;
         private readonly PropertyInfo propertyInfo;
 
-        public DataReaderValueDeserializer(MethodInfo getValueMethod, Type type, int ordinal)
+        public DataReaderValueDeserializer(DataReaderMetadata dataReaderMetadata, MethodInfo getValueMethod, Type type, int ordinal)
         {
+            this.dataReaderMetadata = dataReaderMetadata;
             this.getValueMethod = getValueMethod;
             this.type = type;
             this.ordinal = ordinal;
@@ -24,12 +28,12 @@ namespace DbMap.Deserialization
             nullableInfo = NullableInfo.GetNullable(type);
         }
 
-        public DataReaderValueDeserializer(MethodInfo getValueMethod, FieldInfo fieldInfo, int ordinal) : this(getValueMethod, fieldInfo.FieldType, ordinal)
+        public DataReaderValueDeserializer(DataReaderMetadata dataReaderMetadata, MethodInfo getValueMethod, FieldInfo fieldInfo, int ordinal) : this(dataReaderMetadata, getValueMethod, fieldInfo.FieldType, ordinal)
         {
             this.fieldInfo = fieldInfo;
         }
 
-        public DataReaderValueDeserializer(MethodInfo getValueMethod, PropertyInfo propertyInfo, int ordinal) : this(getValueMethod, propertyInfo.PropertyType, ordinal)
+        public DataReaderValueDeserializer(DataReaderMetadata dataReaderMetadata, MethodInfo getValueMethod, PropertyInfo propertyInfo, int ordinal) : this(dataReaderMetadata, getValueMethod, propertyInfo.PropertyType, ordinal)
         {
             this.propertyInfo = propertyInfo;
         }
@@ -64,7 +68,7 @@ namespace DbMap.Deserialization
         {
             var completeLabel = il.DefineLabel();
 
-            EmitInvoke(il, DbDataReaderMetadata.IsDBNull, ordinal);
+            EmitInvoke(il, dataReaderMetadata.IsDBNullMethod, ordinal);
             il.Emit(OpCodes.Brtrue_S, completeLabel);
 
             // Not null
@@ -89,7 +93,7 @@ namespace DbMap.Deserialization
              var completeLabel = il.DefineLabel();
 
              EmitNull(il);
-             EmitInvoke(il, DbDataReaderMetadata.IsDBNull, ordinal);
+             EmitInvoke(il, dataReaderMetadata.IsDBNullMethod, ordinal);
              il.Emit(OpCodes.Brtrue_S, completeLabel);
 
              // Not null
@@ -111,7 +115,7 @@ namespace DbMap.Deserialization
             }
             else
             {
-                il.Emit(OpCodes.Callvirt, typeof(ThrowException).GetMethod(nameof(ThrowException.NotSupported)));
+                il.Emit(OpCodes.Call, ThrowException.NotSupportedMethod);
             }
         }
 
@@ -151,7 +155,7 @@ namespace DbMap.Deserialization
             }
             else if (propertyInfo != null)
             {
-                il.Emit(OpCodes.Callvirt, propertyInfo.GetSetMethod());
+                il.Emit(OpCodes.Call, propertyInfo.GetSetMethod());
             }
         }
 
@@ -159,7 +163,7 @@ namespace DbMap.Deserialization
         {
             il.Emit(OpCodes.Ldarg_1);
             il.Emit(OpCodes.Ldc_I4, argument0);
-            il.Emit(OpCodes.Callvirt, method);
+            il.Emit(OpCodes.Call, method);
         }
     }
 }
