@@ -5,7 +5,7 @@ namespace DbMap.Deserialization
 {
     public static class DecimalMetadata
     {
-        public static readonly FieldInfo ZeroField = typeof(decimal).GetField("Zero");
+        public static readonly FieldInfo ZeroField = typeof(decimal).GetField(nameof(decimal.Zero));
         public static readonly MethodInfo OpInequalityMethod = typeof(decimal).GetMethod("op_Inequality");
 
         private static readonly MethodInfo[] ConvertToDecimalMethods = new MethodInfo[19];
