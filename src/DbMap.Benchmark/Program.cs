@@ -5,7 +5,13 @@ using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
+using Dapper;
+
 using DbMap.Benchmark.BenchmarkSuite;
+
+using Microsoft.EntityFrameworkCore;
+
+using RepoDb;
 
 namespace DbMap.Benchmark
 {
@@ -21,6 +27,11 @@ namespace DbMap.Benchmark
             Run<MediumBenchmark>();
             Run<LargeBenchmark>();
             Run<ExtraLargeBenchmark>();
+
+            Console.WriteLine("EF Core v" + typeof(DbContext).Assembly.GetName().Version);
+            Console.WriteLine("Dapper v" + typeof(SqlMapper).Assembly.GetName().Version);
+            Console.WriteLine("RepoDb v" + typeof(DbConnectionExtension).Assembly.GetName().Version);
+            Console.WriteLine("DBMap v" + typeof(DbQuery).Assembly.GetName().Version);
 
             Console.ReadLine();
         }
