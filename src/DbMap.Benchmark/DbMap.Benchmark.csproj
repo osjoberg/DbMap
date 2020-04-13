@@ -9,8 +9,8 @@
     <PackageReference Include="BenchmarkDotNet" Version="0.12.1" />
     <PackageReference Include="Dapper" Version="2.0.35" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.3" />
-    <PackageReference Include="RepoDb" Version="1.10.10" />
-    <PackageReference Include="RepoDb.SqlServer" Version="1.0.4" />
+    <PackageReference Include="RepoDb" Version="1.10.11" />
+    <PackageReference Include="RepoDb.SqlServer" Version="1.0.6" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.7.0" />
     <PackageReference Include="Upgrader" Version="1.2.0" />
   </ItemGroup>
