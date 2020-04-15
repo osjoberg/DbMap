@@ -138,7 +138,7 @@ namespace DbMap.Benchmark
                             new Column<float?>("NullableSingle"),
                             new Column<string>("NullableString", nullable: true, length: 10));
 
-                        db.Tables["ExtraLarge"].Rows.AddRange(Enumerable.Range(0, 10000).Select(Large.Create));
+                        db.Tables["ExtraLarge"].Rows.AddRange(Enumerable.Range(0, 10000).Select(ExtraLarge.Create));
             });
 
             steps.Add(

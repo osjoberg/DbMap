@@ -51,11 +51,11 @@ namespace DbMap.Benchmark
 
         public string NullableString { get; set; }
 
-        public static Large Create(int index)
+        public static ExtraLarge Create(int index)
         {
             var offset = index * GetAllPropertyNames().Length;
 
-            return new Large
+            return new ExtraLarge
             {
                 Boolean = index % 2 == 0,
                 Byte = (byte)((offset + 1) % byte.MaxValue),
