@@ -38,20 +38,20 @@ namespace DbMap.Deserialization
             this.propertyInfo = propertyInfo;
         }
 
-        public void EmitDeserializeProperty(ILGenerator il, bool isNullInitialized, bool hasRequiredAttribute)
+        public void EmitDeserializeProperty(ILGenerator il, FieldMap fieldMap, bool isNullInitialized, bool hasRequiredAttribute)
         {
             if (isNullInitialized && hasRequiredAttribute == false)
             {
-                EmitDeserializeNonNullValue(il);
+                EmitDeserializeNullInitializedValue(il);
                 return;
             }
 
             EmitLoadUserType(il);
-            EmitDeserializeClrType(il, hasRequiredAttribute);
+            EmitDeserializeClrType(il, fieldMap, hasRequiredAttribute);
             EmitAssignProperty(il);
         }
 
-        public void EmitDeserializeClrType(ILGenerator il, bool hasRequiredAttribute)
+        public void EmitDeserializeClrType(ILGenerator il, FieldMap fieldMap, bool hasRequiredAttribute)
         {
             if (hasRequiredAttribute || (nullableInfo == null && type.IsClass == false))
             {
@@ -60,11 +60,11 @@ namespace DbMap.Deserialization
             }
             else
             {
-                EmitGetValueOrNull(il);
+                EmitGetValueOrNull(il, fieldMap);
             }
         }
 
-        private void EmitDeserializeNonNullValue(ILGenerator il)
+        private void EmitDeserializeNullInitializedValue(ILGenerator il)
         {
             var completeLabel = il.DefineLabel();
 
@@ -88,23 +88,23 @@ namespace DbMap.Deserialization
             il.Emit(OpCodes.Dup);
         }
 
-        private void EmitGetValueOrNull(ILGenerator il)
+        private void EmitGetValueOrNull(ILGenerator il, FieldMap fieldMap)
         {
-             var completeLabel = il.DefineLabel();
+            var completeLabel = il.DefineLabel();
 
-             EmitNull(il);
-             EmitInvoke(il, dataReaderMetadata.IsDBNullMethod, ordinal);
-             il.Emit(OpCodes.Brtrue_S, completeLabel);
+            EmitNull(il, fieldMap);
+            EmitInvoke(il, dataReaderMetadata.IsDBNullMethod, ordinal);
+            il.Emit(OpCodes.Brtrue_S, completeLabel);
 
-             // Not null
-             {
-                 il.Emit(OpCodes.Pop);
-                 EmitGetValue(il);
-                 EmitConversion(il);
-                 EmitWrapNullable(il);
-             }
+            // Not null
+            {
+                il.Emit(OpCodes.Pop);
+                EmitGetValue(il);
+                EmitConversion(il);
+                EmitWrapNullable(il);
+            }
 
-             il.MarkLabel(completeLabel);
+            il.MarkLabel(completeLabel);
         }
 
         private void EmitGetValue(ILGenerator il)
@@ -127,11 +127,11 @@ namespace DbMap.Deserialization
             }
         }
 
-        private void EmitNull(ILGenerator il)
+        private void EmitNull(ILGenerator il, FieldMap fieldMap)
         {
             if (nullableInfo != null)
             {
-                il.Emit(OpCodes.Ldsfld, nullableInfo.NullConstant);
+                il.Emit(OpCodes.Ldsfld, fieldMap.GetOrDeclareField(type, "<" + nullableInfo.UnderlyingType.Name + ">__NullableConstant"));
             }
             else
             {

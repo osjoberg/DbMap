@@ -6,7 +6,7 @@ using System.Reflection;
 namespace DbMap.Infrastructure
 {
     [EditorBrowsable(EditorBrowsableState.Advanced)]
-    public class NullableInfo
+    internal class NullableInfo
     {
         private static readonly TypeComparer TypeComparerInstance = new TypeComparer();
 
@@ -16,7 +16,6 @@ namespace DbMap.Infrastructure
         {
             UnderlyingType = underlyingType;
             Constructor = type.GetConstructor(new[] { underlyingType });
-            NullConstant = typeof(NullableValue<>).MakeGenericType(underlyingType).GetField(nameof(NullableValue<int>.Value));
             HasValueGetProperty = type.GetProperty(nameof(Nullable<int>.HasValue)).GetGetMethod();
             GetValueOrDefaultMethod = type.GetMethod(nameof(Nullable<int>.GetValueOrDefault), Type.EmptyTypes);
         }
@@ -28,8 +27,6 @@ namespace DbMap.Infrastructure
         public Type UnderlyingType { get; }
 
         public ConstructorInfo Constructor { get; }
-
-        public FieldInfo NullConstant { get; }
 
         public static NullableInfo GetNullable(Type type)
         {
@@ -45,12 +42,7 @@ namespace DbMap.Infrastructure
 
             return nullableInfo;
         }
-
-        public static class NullableValue<TReturn> where TReturn : struct
-        {
-            public static readonly TReturn? Value;
-        }
-
+        
         private class TypeComparer : IEqualityComparer<Type>
         {
             public bool Equals(Type x, Type y)
