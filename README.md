@@ -43,6 +43,15 @@ class Program
 These benchmarks are focused on the deserialization performance of different object-relational mappers. 
 Given differences should be interpreted as theoretical maximum. In reality your query, the network latency and the performance of your database server is more likely to affect performance.
 
+Tested object mappers are:
+EFCore 3.1.3 LINQ query (non-tracking)
+EFCore 3.1.3 Interpolated SQL query (non-tracking)
+EFCore 3.1.3 Raw SQL query (non-tracking)
+EFCore 3.1.3 LINQ cached query (non-tracking)
+Dapper 2.0.35
+RepoDb 1.10.11
+DbMap 0.5.2
+Hand written 
 
 ``` ini
 BenchmarkDotNet=v0.12.0, OS=Windows 10.0.18362
