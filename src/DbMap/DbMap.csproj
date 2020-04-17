@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Version>0.5.2</Version>
+    <Version>0.5.2.1</Version>
     <Authors>Oskar Sjöberg</Authors>
     <Company>-</Company>
     <Description>Performance-oriented database-to-object mapper for .NET</Description>
@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/osjoberg/DbMap</PackageProjectUrl>
     <RepositoryUrl>https://github.com/osjoberg/DbMap</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <AssemblyVersion>0.5.2.0</AssemblyVersion>
+    <AssemblyVersion>0.5.2.1</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
