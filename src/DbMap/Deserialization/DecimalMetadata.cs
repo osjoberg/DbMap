@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace DbMap.Deserialization
 {
-    public static class DecimalMetadata
+    internal static class DecimalMetadata
     {
         public static readonly FieldInfo ZeroField = typeof(decimal).GetField(nameof(decimal.Zero));
         public static readonly MethodInfo OpInequalityMethod = typeof(decimal).GetMethod("op_Inequality");
